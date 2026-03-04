@@ -6,3 +6,6 @@ edition = "2024"
 [dependencies]
 base64 = "0.22.1"
 
+[[example]]
+name = "multithreaded"
+path = "examples/nonce_cache/multithreaded.rs"
