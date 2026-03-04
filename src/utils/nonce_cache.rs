@@ -8,7 +8,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use std::vec::Vec;
 
 use crate::utils::errors::UtilError;
-/// Nonce Cache
+use crate::utils::time::current_time_millis;
+
+/// Thread safe Nonce Cache
+/// `nonce_size` Number of bytes for each nonce value
+/// `age_limit` Time in millis that each nonce is valid
 pub struct NonceCache {
     //sizes  is from int(32 bit) from merrimackutil Noncecache
     nonce_size: u32,
@@ -25,14 +29,6 @@ impl NonceCache {
         let mut f = File::open("/dev/urandom").map_err(|e| UtilError::IoError(e))?;
         f.read_exact(buf).map_err(|e| UtilError::IoError(e))?;
         Ok(())
-    }
-
-    /// TODO add more general util for current time so it behaves like java getCurrentTimeMillis
-    fn current_time() -> Result<u64, UtilError> {
-        Ok(SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|e| UtilError::SystemTimeError(e))?
-            .as_millis() as u64)
     }
 
     /// Creates a new `NonceCache`.
@@ -67,7 +63,7 @@ impl NonceCache {
             )));
         }
 
-        let now = Self::current_time()?;
+        let now = current_time_millis()?;
 
         let mut cache_guard = self
             .cache
@@ -116,7 +112,7 @@ impl NonceCache {
         match cache_guard.get(nonce) {
             None => Ok(false),
             Some(&time) => {
-                let now = Self::current_time()?;
+                let now = current_time_millis()?;
                 //return if entry still valid
                 Ok(now - time < self.age_limit)
             }
@@ -141,7 +137,7 @@ impl NonceCache {
             Self::get_random_bytes(&mut nonce_bytes)?;
 
             //get current time in millis
-            let now: u64 = Self::current_time()?;
+            let now: u64 = current_time_millis()?;
 
             //acquire write lock - if we get good nonce we need to write that value to cache
             let mut cache_guard = self.cache.write().map_err(|e| {
