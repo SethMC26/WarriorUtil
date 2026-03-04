@@ -4,7 +4,6 @@ use std::fs::File;
 use std::io::Read;
 use std::result::Result;
 use std::sync::{Arc, RwLock};
-use std::time::{SystemTime, UNIX_EPOCH};
 use std::vec::Vec;
 
 use crate::utils::errors::UtilError;
@@ -161,6 +160,17 @@ impl NonceCache {
                 }
             }
             //cache_guard goes out of scope and lock is dropped
+        }
+    }
+}
+
+//We will add a clone function to allow users to safely share Nonce Cache among threads without wrapping in ARC
+impl Clone for NonceCache {
+    fn clone(&self) -> Self {
+        Self {
+            nonce_size: self.nonce_size,
+            age_limit: self.age_limit,
+            cache: Arc::clone(&self.cache),  // cheap — just increments ref count
         }
     }
 }
