@@ -1,4 +1,4 @@
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use serde_json::Error;
 use std::collections::HashMap;
 
@@ -10,14 +10,27 @@ use std::collections::HashMap;
 /// - `host_name` → `"host-name"`
 /// - `address`
 /// - `port`
-struct HostEntry {
+pub struct HostEntry {
     port: u16,
+    #[serde(rename = "host-name")]
     host_name: String,
     //for now we are using epic json macros to do all our dirty json work, we can rename keys this way
-    #[serde(rename = "host-name")]
     address: String,
 }
-
+impl HostEntry {
+    ///Returns a HostEntry with given port, host_name and address
+    /// # Arguments
+    /// * `host_name` 
+    /// * `address`
+    /// * `port`
+    pub fn new(host_name: &str, address: &str, port: u16) -> Self {
+        HostEntry {
+            host_name: host_name.to_string(),
+            port: port,
+            address: address.to_string()
+        }
+    }
+}
 //TODO update with more merrimack Util like serialization
 #[derive(Serialize, Deserialize)]
 /// Simple hosts database modeled after MerrimackUtil.
@@ -32,7 +45,7 @@ struct HostEntry {
 /// `{ "hosts": { "example.com": { "address": "...", "port": ..., "host-name": "..." } } }`
 ///
 /// Use `to_json_str()` and `from_json_str()` if you need the original array-based structure.
-struct HostsDatabase {
+pub struct HostsDatabase {
     #[serde(rename = "hosts")]
     host_map: HashMap<String, HostEntry>,
 }

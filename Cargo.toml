@@ -11,3 +11,7 @@ serde_json = "1.0.149"
 [[example]]
 name = "multithreaded"
 path = "examples/nonce_cache/multithreaded.rs"
+
+[[example]]
+name = "hosts_example"
+path = "examples/hosts_database/hosts_example.rs"
