@@ -2,6 +2,7 @@
 
 A small library meant to be used to help Merrimack College students learn and use Rust. This Library is based off of MerrimackUtil.
 
+**Currently project is in an alpha. It is unstable and may change quickly** 
 ## Purpose
 
 Help Merrimack College students learn and use Rust in their assignments by
@@ -59,10 +60,18 @@ databases, nonce caches, etc.) so they can focus on core learning.
     - Custom traits, structs and marcos to help serde_json behave more like MerrimackUtil JSON
 - Crypto
     - Update with a Good Crypto crate, add examples and provide custom features to make working with crypto primitives easier
+- Nonce cache
+    - Fix current hacky solution with a good secure Random 
+- Logging feature
+- Add testing to ensure library
+- CI/CD?
 - Examples
     - Add networking examples
     - Add Crypto Examples
     - Other examples from merrimack_cs_examples
+- Reduce dependencies as much as possible
+    - Serde_json and serde are massive dependencies
+        - Look into custom solutions or only using custom crate/cargo imports to reduce dependency footprint
 
 ## Contributions
 Contributions are welcome! Please contact for further information on contributions: holtzmans@merrimack.edu
