@@ -170,7 +170,7 @@ impl Clone for NonceCache {
         Self {
             nonce_size: self.nonce_size,
             age_limit: self.age_limit,
-            cache: Arc::clone(&self.cache),  // cheap — just increments ref count
+            cache: Arc::clone(&self.cache), // cheap — just increments ref count
         }
     }
 }

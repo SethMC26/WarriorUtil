@@ -10,21 +10,15 @@ fn main() {
 
     // spawn 5 producer threads — each generates nonces
     for thread_id in 0..5 {
-        let cache = cache.clone();  // cheap — just increments Arc ref count
+        let cache = cache.clone(); // cheap — just increments Arc ref count
 
         let handle = thread::spawn(move || {
             println!("thread {} — generating nonces", thread_id);
 
             for i in 0..3 {
                 match cache.get_nonce() {
-                    Ok(nonce) => println!(
-                        "thread {} nonce {}: {:?}",
-                        thread_id, i, nonce
-                    ),
-                    Err(e) => eprintln!(
-                        "thread {} failed to get nonce: {}",
-                        thread_id, e
-                    ),
+                    Ok(nonce) => println!("thread {} nonce {}: {:?}", thread_id, i, nonce),
+                    Err(e) => eprintln!("thread {} failed to get nonce: {}", thread_id, e),
                 }
             }
         });
@@ -38,7 +32,7 @@ fn main() {
 
         let handle = thread::spawn(move || {
             let nonce = match cache.get_nonce() {
-                Ok(n)  => n,
+                Ok(n) => n,
                 Err(e) => {
                     eprintln!("consumer thread {} failed: {}", thread_id, e);
                     return;
@@ -46,18 +40,9 @@ fn main() {
             };
 
             match cache.contains_nonce(&nonce) {
-                Ok(true)  => println!(
-                    "consumer thread {} — nonce found ✅",
-                    thread_id
-                ),
-                Ok(false) => println!(
-                    "consumer thread {} — nonce NOT found ❌",
-                    thread_id
-                ),
-                Err(e) => eprintln!(
-                    "consumer thread {} — error: {}",
-                    thread_id, e
-                ),
+                Ok(true) => println!("consumer thread {} — nonce found ✅", thread_id),
+                Ok(false) => println!("consumer thread {} — nonce NOT found ❌", thread_id),
+                Err(e) => eprintln!("consumer thread {} — error: {}", thread_id, e),
             }
         });
 
@@ -72,7 +57,7 @@ fn main() {
             println!("\n--- replay attack simulation ---");
 
             let nonce = match cache.get_nonce() {
-                Ok(n)  => n,
+                Ok(n) => n,
                 Err(e) => {
                     eprintln!("replay thread failed: {}", e);
                     return;
@@ -81,9 +66,9 @@ fn main() {
 
             // nonce should exist — was just added by get_nonce
             match cache.contains_nonce(&nonce) {
-                Ok(true)  => println!("replay: nonce exists in cache ✅"),
+                Ok(true) => println!("replay: nonce exists in cache ✅"),
                 Ok(false) => println!("replay: nonce missing — unexpected ❌"),
-                Err(e)    => eprintln!("replay: error: {}", e),
+                Err(e) => eprintln!("replay: error: {}", e),
             }
 
             // try to add same nonce again — should not update timestamp
@@ -94,9 +79,9 @@ fn main() {
 
             // confirm nonce still valid
             match cache.contains_nonce(&nonce) {
-                Ok(true)  => println!("replay: nonce still valid ✅"),
+                Ok(true) => println!("replay: nonce still valid ✅"),
                 Ok(false) => println!("replay: nonce expired — unexpected ❌"),
-                Err(e)    => eprintln!("replay: error: {}", e),
+                Err(e) => eprintln!("replay: error: {}", e),
             }
         });
 
