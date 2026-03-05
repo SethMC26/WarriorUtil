@@ -1,3 +1,4 @@
+use std::fs::File;
 use warrior_util::net::net_db::HostsDatabase;
 
 fn main() {
@@ -89,4 +90,9 @@ fn main() {
         println!("Got error while parsing host database...")
     }
     //depending on how we want to handle errors rust provides some nice ways to reduce boilerplate code
+
+    //we can also create the host database from a file
+    let mut file = File::open("examples/hosts_database/hosts.json").expect("File exists");
+    let db = HostsDatabase::from_file(&mut file).expect("Good JSON format");
+    println!("db from file {:?}", db);
 }

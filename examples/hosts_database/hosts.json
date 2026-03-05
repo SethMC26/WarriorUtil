@@ -1,0 +1,14 @@
+{
+"hosts": [
+        {
+            "host-name": "google.com",
+            "address": "8.8.8.8",
+            "port": 443
+        },
+        {
+            "host-name": "localhost",
+            "address": "127.0.0.1",
+            "port": 8080
+        }
+    ]
+}

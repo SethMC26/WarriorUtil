@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Error;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Read;
 
 //TODO update with more merrimack Util like serialization
 #[derive(Serialize, Deserialize, Debug)]
@@ -82,7 +84,7 @@ impl HostsDatabase {
 
     /// Returns Serialized database as a JSON string into the format from MerrimackUtil
     ///
-    /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... } ] }`
+    /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... }, ...] }`
     pub fn to_json_str(&self) -> Result<String, Error> {
         let values: Vec<&HostEntry> = self.host_map.values().collect();
         serde_json::to_string(&serde_json::json!({
@@ -93,7 +95,7 @@ impl HostsDatabase {
     /// Deserializes the format used in CS classes at Merrimack College for hosts into a `HostsDatabase`.
     ///
     /// Expects JSON of the form:
-    /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... } ] }`
+    /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... }, ...] }`
     /// # Arguments
     /// * `json_str` String slice to turn into Hosts Database
     pub fn from_json_str(json_str: &str) -> Result<Self, Error> {
@@ -112,5 +114,18 @@ impl HostsDatabase {
         }
 
         Ok(HostsDatabase { host_map: map })
+    }
+
+    ///Create a HostDatabase from a file
+    ///
+    ///Expects JSON of the form:
+    /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... }, ...] }`
+    ///
+    pub fn from_file(file: &mut File) -> Result<Self, Error> {
+        let mut json_str = String::new();
+        //read contents of file into string
+        let _ = file.read_to_string(&mut json_str).map_err(Error::io)?;
+        //turn string into json of hostDB
+        Self::from_json_str(json_str.as_str())
     }
 }
