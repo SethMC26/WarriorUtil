@@ -3,7 +3,7 @@ use serde_json::Error;
 use std::collections::HashMap;
 
 //TODO update with more merrimack Util like serialization
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 /// Represents a single host entry.
 ///
 /// Serialized field names follow Merrimack-style JSON conventions:
@@ -20,19 +20,19 @@ pub struct HostEntry {
 impl HostEntry {
     ///Returns a HostEntry with given port, host_name and address
     /// # Arguments
-    /// * `host_name` 
+    /// * `host_name`
     /// * `address`
     /// * `port`
     pub fn new(host_name: &str, address: &str, port: u16) -> Self {
         HostEntry {
             host_name: host_name.to_string(),
             port: port,
-            address: address.to_string()
+            address: address.to_string(),
         }
     }
 }
 //TODO update with more merrimack Util like serialization
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 /// Simple hosts database modeled after MerrimackUtil.
 ///
 /// ⚠ Note:
