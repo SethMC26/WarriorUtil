@@ -28,7 +28,9 @@ databases, nonce caches, etc.) so they can focus on core learning.
    cargo run --example json_basic
    # run nonce cache example
    cargo run --example multithreaded
-   ```
+   # run cli example 
+   cargo run --example cli -- --help
+   ```Expected argu
 
    The examples demonstrate the basic APIs and how serialization/deserialization
    is handled using `serde`.
@@ -51,7 +53,7 @@ databases, nonce caches, etc.) so they can focus on core learning.
     - `nonce_cache` - Examples of nonce cache
 - `src/` – core library code  
     - `net/` - Network Database(hosts database)
-    - `utils/` – nonce_cache, errors(for Utils module), time 
+    - `utils/` – nonce_cache, errors(for Utils module), time, cli 
     - `lib.rs` Library exports
 - `Cargo.toml` – crate manifest
 

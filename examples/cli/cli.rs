@@ -15,7 +15,7 @@ fn main() {
 
     //lets make the usage string
     let mut usage: String = String::from(
-        "Usage:\n\texample --config <config> --port <port>\n\texample --port <port>\n\texample --help",
+        "Usage:\n  example --config <config> --port <port>\n  example --port <port>\n  example --help\n",
     );
     //add options using helper method
     usage.push_str(&cli::options_string(&ops));
