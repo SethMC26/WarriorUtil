@@ -1,4 +1,12 @@
 use std::{collections::HashMap, env};
+/// Represents a command line option with both a short and long form.
+/// 
+/// # Examples
+/// ```
+/// let op = LongOp::new("p", "port", "Port to use.");
+/// let op_no_arg = LongOp::new("h", "help", "Display help.").has_arg(false);
+/// ```
+#[derive(Hash, Eq, PartialEq)]
 pub struct LongOp {
     pub short_op: String,
     pub long_op: String,
@@ -7,6 +15,13 @@ pub struct LongOp {
 }
 
 impl LongOp {
+    /// Creates a new `LongOp` with the given short and long forms and usage description.
+    /// By default `has_arg` is `true`.
+    /// 
+    /// # Arguments
+    /// * `short_op` - The short form of the option e.g. `p` for `-p`
+    /// * `long_op` - The long form of the option e.g. `port` for `--port`
+    /// * `usage` - Description of what the option does
     pub fn new(
         short_op: impl Into<String>,
         long_op: impl Into<String>,
@@ -19,13 +34,30 @@ impl LongOp {
             has_arg: true,
         }
     }
-
+    /// Sets whether this long option expects a value after it.
+    /// 
+    /// # Examples
+    /// ```
+    /// let op = LongOp::new("h", "help", "Display help.").has_arg(false);
+    /// ```
     pub fn has_arg(mut self, has_arg: bool) -> Self {
         self.has_arg = has_arg;
         self
     }
 }
 
+/// Returns a formatted string of all options for display in help text.
+/// 
+/// # Arguments
+/// * `ops` - Slice of `LongOp` to display
+/// 
+/// # Examples
+/// ```
+/// let ops = vec![LongOp::new("p", "port", "Port to use.")];
+/// println!("{}", options_string(&ops));
+/// // Options:
+/// //   -p, --port      Port to use.
+/// ```
 pub fn options_string(ops: &[LongOp]) -> String {
     let mut builder: String = String::from("Options: \n");
     for op in ops {
@@ -37,9 +69,21 @@ pub fn options_string(ops: &[LongOp]) -> String {
     builder
 }
 
-pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<String, String>, String> {
+/// Parses command line arguments and maps them to their corresponding `LongOp`.
+/// 
+/// Returns a `HashMap` mapping each matched `LongOp` to its value, or an empty
+/// string if the option takes no argument.
+/// 
+/// # Arguments
+/// * `ops` - Slice of valid `LongOp` to match against
+/// 
+/// # Errors
+/// * If an argument doesn't start with `-` or `--`
+/// * If an unknown option is provided
+/// * If an option that requires a value is not followed by one
+pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<&LongOp, String>, String> {
     //make map to store ops
-    let mut op_map: HashMap<String, String> = HashMap::new();
+    let mut op_map: HashMap<&LongOp, String> = HashMap::new();
     let mut args = env::args().skip(1);
     //get all enviroment args skipping first one(is the program name)
     while let Some(arg) = args.next() {
@@ -59,9 +103,9 @@ pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<String, String>, String> {
                     let arg_val: String = args
                         .next()
                         .ok_or(format!("Expected argument but none found"))?;
-                    op_map.insert(op.long_op.clone(), arg_val);
+                    op_map.insert(op, arg_val);
                 } else {
-                    op_map.insert(op.long_op.clone(), "".into());
+                    op_map.insert(op, "".into());
                 }
             }
             None => {
