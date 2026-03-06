@@ -18,3 +18,7 @@ path = "examples/hosts_database/hosts_example.rs"
 [[example]]
 name = "json_basic"
 path = "examples/json/serde_basic.rs"
+
+[[example]]
+name = "cli"
+path = "examples/cli/cli.rs"
