@@ -1,6 +1,6 @@
 use std::{collections::HashMap, env};
 /// Represents a command line option with both a short and long form.
-/// 
+///
 /// # Examples
 /// ```
 /// let op = LongOp::new("p", "port", "Port to use.");
@@ -17,7 +17,7 @@ pub struct LongOp {
 impl LongOp {
     /// Creates a new `LongOp` with the given short and long forms and usage description.
     /// By default `has_arg` is `true`.
-    /// 
+    ///
     /// # Arguments
     /// * `short_op` - The short form of the option e.g. `p` for `-p`
     /// * `long_op` - The long form of the option e.g. `port` for `--port`
@@ -35,7 +35,7 @@ impl LongOp {
         }
     }
     /// Sets whether this long option expects a value after it.
-    /// 
+    ///
     /// # Examples
     /// ```
     /// let op = LongOp::new("h", "help", "Display help.").has_arg(false);
@@ -47,10 +47,10 @@ impl LongOp {
 }
 
 /// Returns a formatted string of all options for display in help text.
-/// 
+///
 /// # Arguments
 /// * `ops` - Slice of `LongOp` to display
-/// 
+///
 /// # Examples
 /// ```
 /// let ops = vec![LongOp::new("p", "port", "Port to use.")];
@@ -70,13 +70,13 @@ pub fn options_string(ops: &[LongOp]) -> String {
 }
 
 /// Parses command line arguments and maps them to their corresponding `LongOp`.
-/// 
+///
 /// Returns a `HashMap` mapping each matched `LongOp` to its value, or an empty
 /// string if the option takes no argument.
-/// 
+///
 /// # Arguments
 /// * `ops` - Slice of valid `LongOp` to match against
-/// 
+///
 /// # Errors
 /// * If an argument doesn't start with `-` or `--`
 /// * If an unknown option is provided

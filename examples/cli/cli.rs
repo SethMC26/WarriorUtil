@@ -39,15 +39,15 @@ fn main() {
     //check if port is passed
     let port: u32 = op_map
         //Map will return None if argument was not provided
-        .get(&ops[1]) 
+        .get(&ops[1])
         //Turn option to result(None gets mapped into error)
-        .ok_or("port is required") 
+        .ok_or("port is required")
         //if not error attempt to parse port as number infers type from port: u32 and if error map error to string type error
-        .and_then(|p| p.parse().map_err(|_| "port must be a number")) 
+        .and_then(|p| p.parse().map_err(|_| "port must be a number"))
         //if error handle it with closure
         .unwrap_or_else(|e| {
             eprintln!("Error: {}", e);
-            eprintln!("{}", cli::options_string(&ops));
+            eprintln!("{}", usage);
             std::process::exit(1);
         });
 
