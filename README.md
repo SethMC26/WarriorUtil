@@ -63,7 +63,8 @@ databases, nonce caches, etc.) so they can focus on core learning.
 - Nonce cache
     - Fix current hacky solution with a good secure Random 
 - Logging feature
-- Add testing to ensure library
+- Fun data structures like skip lists and bloom filters
+- Add testing to ensure library stability
 - CI/CD?
 - Examples
     - Add networking examples
