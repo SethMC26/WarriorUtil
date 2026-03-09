@@ -22,3 +22,7 @@ path = "examples/json/serde_basic.rs"
 [[example]]
 name = "cli"
 path = "examples/cli/cli.rs"
+
+[[example]]
+name = "base64"
+path = "examples/base64/base64.rs"
