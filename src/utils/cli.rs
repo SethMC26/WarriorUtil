@@ -1,10 +1,15 @@
+// Copyright (c) 2026 Seth Holtzman
+// SPDX-License-Identifier: MIT
+// Author: Seth Holtzman
+// See LICENSE file in the project root for full license text.
+
 use std::{collections::HashMap, env};
 /// Represents a command line option with both a short and long form.
 ///
 /// # Examples
 /// ```
 /// use warrior_util::utils::cli::{LongOp};
-/// 
+///
 /// let op = LongOp::new("p", "port", "Port to use.");
 /// let op_no_arg = LongOp::new("h", "help", "Display help.").has_arg(false);
 /// ```
@@ -41,7 +46,7 @@ impl LongOp {
     /// # Examples
     /// ```
     /// use warrior_util::utils::cli::{LongOp};
-    /// 
+    ///
     /// let op = LongOp::new("h", "help", "Display help.").has_arg(false);
     /// ```
     pub fn has_arg(mut self, has_arg: bool) -> Self {
@@ -58,7 +63,7 @@ impl LongOp {
 /// # Examples
 /// ```
 /// use warrior_util::utils::cli::{LongOp, options_string};
-/// 
+///
 /// let ops = vec![LongOp::new("p", "port", "Port to use.")];
 /// println!("{}", options_string(&ops));
 /// // Options:

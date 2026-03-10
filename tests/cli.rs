@@ -1,3 +1,8 @@
+// Copyright (c) 2026 Seth Holtzman
+// SPDX-License-Identifier: MIT
+// Author: Seth Holtzman
+// See LICENSE file in the project root for full license text.
+
 //! # Test Plan for cli Module
 //!
 //! Author: Claude Sonnet 4.6 (Anthropic)
