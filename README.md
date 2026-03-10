@@ -46,11 +46,49 @@ databases, nonce caches, etc.) so they can focus on core learning.
 
    and import from the crate (`use warrior_util::…`) as needed.
 
+## Features
+
+This library provides the following utilities:
+
+- **Base64 Encoding/Decoding**: RFC 4648 compliant encoding and decoding
+- **Command Line Interface (CLI) Parsing**: Flexible option parsing with short (-p) and long (--port) forms, argument validation, help text generation, and easy argument lookup.
+- **Nonce Cache**: Thread-safe caching for nonces(number once) with configurable expiry, and nonce size. 
+- **Time Utilities**: Basic time utility similiar to in java `getCurrentTimeMillis()`
+- **Network Hosts Database**: JSON-based host database compatible with MerrimackUtil format. Used for networking/Network security projects at Merrimack College.
+
+```rust
+// Base64 usage
+use warrior_util::utils::base64::{encode, decode};
+let encoded = encode(b"Hello, World!");
+let decoded = decode(&encoded).unwrap();
+
+// CLI parsing usage
+use warrior_util::utils::cli::{LongOp, get_op_map};
+let ops = vec![LongOp::new("p", "port", "Port to use")];
+let op_map = get_op_map(&ops).unwrap();
+let port = op_map.get(ops[0]).unwrap();
+
+// Nonce cache usage
+use warrior_util::utils::nonce_cache::NonceCache;
+let cache = NonceCache::new(16, 30000);
+let nonce = cache.get_nonce().unwrap();
+
+// Time utilities usage
+use warrior_util::utils::time::current_time_millis;
+let timestamp = current_time_millis().unwrap();
+
+// Network hosts database usage
+use warrior_util::net::net_db::HostsDatabase;
+let json = r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#;
+let db = HostsDatabase::from_json_str(json).unwrap();
+```
+
 ## 📁 Project structure
 - `examples/` – runnable demos (hosts database, JSON/serde usage, nonce cache)  
     - `hosts_database` - Examples for the Host Database
     - `json` - Examples of JSON
     - `nonce_cache` - Examples of nonce cache
+    - `base64` - Example of base64 decoder/encoded
 - `src/` – core library code  
     - `net/` - Network Database(hosts database)
     - `utils/` – nonce_cache, errors(for Utils module), time, cli, Base64 encoder/decoder
@@ -66,7 +104,6 @@ databases, nonce caches, etc.) so they can focus on core learning.
     - Fix current hacky solution with a good secure Random 
 - Logging feature
 - Fun data structures like skip lists and bloom filters
-- Add testing to ensure library stability
 - CI/CD?
 - Examples
     - Add networking examples
