@@ -1,3 +1,5 @@
+use crate::utils::errors::UtilError;
+
 /// Base 64 charset as bytes(only need u8 for these specific chars)
 const CHARS: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 /// Bit mask to get lower 6 bits from 8 bit number
@@ -127,16 +129,16 @@ pub fn encode(bytes: &[u8]) -> String {
 /// # Examples
 /// ```
 /// use warrior_util::utils::base64::{decode};
-/// 
+///
 /// assert_eq!(decode("TWFu").unwrap(), b"Man");
 /// assert!(decode("invalid!").is_err());
 /// ```
-pub fn decode(base_64_str: &str) -> Result<Vec<u8>, String> {
+pub fn decode(base_64_str: &str) -> Result<Vec<u8>, UtilError> {
     if base_64_str.len() % 4 != 0 {
-        return Err(format!(
+        return Err(UtilError::InvalidInput(format!(
             "Invalid Base 64 string length: {}",
             base_64_str.len()
-        ));
+        )));
     }
 
     let mut bytes: Vec<u8> = Vec::new();
@@ -146,7 +148,7 @@ pub fn decode(base_64_str: &str) -> Result<Vec<u8>, String> {
         let char_2: u32 = lookup_base64_char(chunks[1])? as u32;
         let char_3: u32 = lookup_base64_char(chunks[2])? as u32;
         let char_4: u32 = lookup_base64_char(chunks[3])? as u32;
-        //each base 64 char represents some 6 bit number so we shift each by 6 
+        //each base 64 char represents some 6 bit number so we shift each by 6
         let combined: u32 = char_1 << 18 | char_2 << 12 | char_3 << 6 | char_4;
 
         //we get the three bytes from base64 char (6 * 4 / 8 = 3)
@@ -171,10 +173,13 @@ pub fn decode(base_64_str: &str) -> Result<Vec<u8>, String> {
 /// # Errors
 /// * If the character is not valid ASCII (value > 127)
 /// * If the character is not in the Base64 alphabet
-fn lookup_base64_char(c: u8) -> Result<u8, String> {
+fn lookup_base64_char(c: u8) -> Result<u8, UtilError> {
     // base64 only uses ASCII characters so anything above 127 is invalid
     if c > 127 {
-        return Err(format!("Invalid Base64 character {} ", c as char));
+        return Err(UtilError::InvalidInput(format!(
+            "Invalid Base64 character {} ",
+            c as char
+        )));
     }
 
     // look up the 6 bit index in the decode table
@@ -183,7 +188,10 @@ fn lookup_base64_char(c: u8) -> Result<u8, String> {
 
     // character is not in the base64 alphabet
     if index == 255 {
-        return Err(format!("Invalid Base64 character {} ", c as char));
+        return Err(UtilError::InvalidInput(format!(
+            "Invalid Base64 character {} ",
+            c as char
+        )));
     }
 
     Ok(index)
