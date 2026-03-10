@@ -45,7 +45,7 @@ const DECODE_TABLE: [u8; 128] = {
 /// ```
 /// use warrior_util::utils::base64;
 ///
-/// let base_64_str: String = base64::encode(b"Hello, World!", "SGVsbG8sIFdvcmxkIQ==");
+/// let base_64_str: String = base64::encode(b"Hello, World!"); // SGVsbG8sIFdvcmxkIQ==
 /// ```
 pub fn encode(bytes: &[u8]) -> String {
     let remainder = bytes.len() % 3;
@@ -126,6 +126,8 @@ pub fn encode(bytes: &[u8]) -> String {
 ///
 /// # Examples
 /// ```
+/// use warrior_util::utils::base64::{decode};
+/// 
 /// assert_eq!(decode("TWFu").unwrap(), b"Man");
 /// assert!(decode("invalid!").is_err());
 /// ```
@@ -144,9 +146,10 @@ pub fn decode(base_64_str: &str) -> Result<Vec<u8>, String> {
         let char_2: u32 = lookup_base64_char(chunks[1])? as u32;
         let char_3: u32 = lookup_base64_char(chunks[2])? as u32;
         let char_4: u32 = lookup_base64_char(chunks[3])? as u32;
-
+        //each base 64 char represents some 6 bit number so we shift each by 6 
         let combined: u32 = char_1 << 18 | char_2 << 12 | char_3 << 6 | char_4;
 
+        //we get the three bytes from base64 char (6 * 4 / 8 = 3)
         bytes.push((combined >> 16) as u8);
         bytes.push((combined >> 8) as u8);
         bytes.push(combined as u8);

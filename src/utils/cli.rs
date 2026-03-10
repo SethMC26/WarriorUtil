@@ -3,6 +3,8 @@ use std::{collections::HashMap, env};
 ///
 /// # Examples
 /// ```
+/// use warrior_util::utils::cli::{LongOp};
+/// 
 /// let op = LongOp::new("p", "port", "Port to use.");
 /// let op_no_arg = LongOp::new("h", "help", "Display help.").has_arg(false);
 /// ```
@@ -38,6 +40,8 @@ impl LongOp {
     ///
     /// # Examples
     /// ```
+    /// use warrior_util::utils::cli::{LongOp};
+    /// 
     /// let op = LongOp::new("h", "help", "Display help.").has_arg(false);
     /// ```
     pub fn has_arg(mut self, has_arg: bool) -> Self {
@@ -53,6 +57,8 @@ impl LongOp {
 ///
 /// # Examples
 /// ```
+/// use warrior_util::utils::cli::{LongOp, options_string};
+/// 
 /// let ops = vec![LongOp::new("p", "port", "Port to use.")];
 /// println!("{}", options_string(&ops));
 /// // Options:
