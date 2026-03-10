@@ -22,7 +22,7 @@
 //! - `test_options_string_empty`: Handles empty option lists
 
 use std::collections::HashSet;
-use warrior_util::utils::cli::{options_string, LongOp};
+use warrior_util::utils::cli::{LongOp, options_string};
 
 #[test]
 /// Positive test: Creates a LongOp with correct fields, has_arg defaults to true
@@ -72,7 +72,7 @@ fn test_long_op_hash_eq() {
 
     let mut set = HashSet::new();
     set.insert(op1);
-    assert!(!set.insert(op2));  // duplicate — should not insert
+    assert!(!set.insert(op2)); // duplicate — should not insert
     set.insert(op3);
     assert_eq!(set.len(), 2);
 }

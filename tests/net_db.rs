@@ -28,10 +28,10 @@
 //! - `test_from_file_invalid_json`: Fails on invalid file content
 //! - Empty database operations (get_port, get_address return None)
 
-use warrior_util::net::net_db::{HostEntry, HostsDatabase};
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+use warrior_util::net::net_db::{HostEntry, HostsDatabase};
 
 #[test]
 /// Positive test: Validates HostEntry creation and serialization
@@ -57,7 +57,10 @@ fn test_hosts_database_empty() {
 #[test]
 /// Positive test: Tests database with valid hosts
 fn test_hosts_database_with_hosts() {
-    let db = HostsDatabase::from_json_str(r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#).unwrap();
+    let db = HostsDatabase::from_json_str(
+        r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#,
+    )
+    .unwrap();
     assert_eq!(db.get_port("example.com"), Some(8080));
     assert_eq!(db.get_address("example.com"), Some("192.168.1.1"));
     assert!(db.host_known("example.com"));
@@ -69,7 +72,10 @@ fn test_hosts_database_with_hosts() {
 
 #[test]
 fn test_to_json_str() {
-    let db = HostsDatabase::from_json_str(r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#).unwrap();
+    let db = HostsDatabase::from_json_str(
+        r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#,
+    )
+    .unwrap();
     let json = db.to_json_str().unwrap();
     // Should contain the host
     assert!(json.contains("\"host-name\":\"example.com\""));
@@ -87,7 +93,8 @@ fn test_to_json_str_empty() {
 #[test]
 /// Positive test: Parses valid JSON string
 fn test_from_json_str_valid() {
-    let json = r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#;
+    let json =
+        r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#;
     let db = HostsDatabase::from_json_str(json).unwrap();
     assert_eq!(db.get_port("example.com"), Some(8080));
     assert_eq!(db.get_address("example.com"), Some("192.168.1.1"));
@@ -136,7 +143,8 @@ fn test_from_json_str_duplicate_hosts() {
 #[test]
 /// Positive test: Reads valid JSON from file
 fn test_from_file_valid() {
-    let json = r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#;
+    let json =
+        r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#;
     let temp_path = PathBuf::from(format!("/tmp/test_hosts_valid_{}.json", std::process::id()));
     {
         let mut file = File::create(&temp_path).unwrap();
@@ -152,7 +160,10 @@ fn test_from_file_valid() {
 /// Negative test: Fails on invalid file content
 fn test_from_file_invalid_json() {
     let json = r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}"#;
-    let temp_path = PathBuf::from(format!("/tmp/test_hosts_invalid_{}.json", std::process::id()));
+    let temp_path = PathBuf::from(format!(
+        "/tmp/test_hosts_invalid_{}.json",
+        std::process::id()
+    ));
     {
         let mut file = File::create(&temp_path).unwrap();
         write!(file, "{}", json).unwrap();

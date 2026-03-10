@@ -82,10 +82,7 @@ fn test_encode_all_bytes() {
 #[test]
 /// Positive test: Decodes valid Base64 string — "Hack the Planet!" from Hackers (1995)
 fn test_decode_valid() {
-    assert_eq!(
-        decode(HACK_THE_PLANET_ENCODED).unwrap(),
-        HACK_THE_PLANET
-    );
+    assert_eq!(decode(HACK_THE_PLANET_ENCODED).unwrap(), HACK_THE_PLANET);
 }
 
 #[test]
@@ -119,7 +116,7 @@ fn test_decode_invalid_length() {
     assert!(decode("ab").is_err());
     assert!(decode("abc").is_err());
     assert!(decode("abcde").is_err());
-    assert!(decode("AAAA=").is_err());  // padding makes length invalid
+    assert!(decode("AAAA=").is_err()); // padding makes length invalid
 }
 
 #[test]

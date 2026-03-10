@@ -55,10 +55,16 @@ fn test_add_nonce_wrong_size() {
     let cache = NonceCache::new(4, 1000);
 
     let too_short = vec![1, 2, 3];
-    assert!(matches!(cache.add_nonce(&too_short), Err(UtilError::InvalidInput(_))));
+    assert!(matches!(
+        cache.add_nonce(&too_short),
+        Err(UtilError::InvalidInput(_))
+    ));
 
     let too_long = vec![1, 2, 3, 4, 5];
-    assert!(matches!(cache.add_nonce(&too_long), Err(UtilError::InvalidInput(_))));
+    assert!(matches!(
+        cache.add_nonce(&too_long),
+        Err(UtilError::InvalidInput(_))
+    ));
 }
 
 #[test]
@@ -75,7 +81,10 @@ fn test_contains_nonce_correct_size() {
 fn test_contains_nonce_wrong_size() {
     let cache = NonceCache::new(4, 1000);
     let nonce = vec![1, 2, 3];
-    assert!(matches!(cache.contains_nonce(&nonce), Err(UtilError::InvalidInput(_))));
+    assert!(matches!(
+        cache.contains_nonce(&nonce),
+        Err(UtilError::InvalidInput(_))
+    ));
 }
 
 #[test]
@@ -120,10 +129,10 @@ fn test_get_nonce_unique() {
 #[test]
 /// Edge case test: Nonce expires after age_limit milliseconds
 fn test_nonce_expiry() {
-    let cache = NonceCache::new(4, 10);  // 10ms age limit
+    let cache = NonceCache::new(4, 10); // 10ms age limit
     let nonce = vec![1, 2, 3, 4];
     cache.add_nonce(&nonce).unwrap();
-    thread::sleep(Duration::from_millis(20));  // sleep well past expiry
+    thread::sleep(Duration::from_millis(20)); // sleep well past expiry
     assert!(!cache.contains_nonce(&nonce).unwrap());
 }
 
@@ -144,9 +153,7 @@ fn test_concurrent_access() {
     let cache = NonceCache::new(4, 1000);
     let cache_clone = cache.clone();
 
-    let handle = thread::spawn(move || {
-        cache_clone.get_nonce().unwrap()
-    });
+    let handle = thread::spawn(move || cache_clone.get_nonce().unwrap());
 
     let nonce2 = cache.get_nonce().unwrap();
     let nonce1 = handle.join().unwrap();

@@ -32,7 +32,10 @@ fn test_util_error_display() {
     assert_eq!(format!("{}", err), "invalid input: bad value");
 
     let err = UtilError::LockPoisoned("thread panicked".to_string());
-    assert_eq!(format!("{}", err), "lock poisoned by panicking thread: thread panicked");
+    assert_eq!(
+        format!("{}", err),
+        "lock poisoned by panicking thread: thread panicked"
+    );
 
     let io_err = io::Error::new(io::ErrorKind::NotFound, "file not found");
     let err = UtilError::IoError(io_err);
