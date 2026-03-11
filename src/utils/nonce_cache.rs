@@ -30,8 +30,8 @@ impl NonceCache {
     /// TODO update with crypto crate
     /// Claude generated function
     fn get_random_bytes(buf: &mut [u8]) -> Result<(), UtilError> {
-        let mut f = File::open("/dev/urandom").map_err(|e| UtilError::IoError(e))?;
-        f.read_exact(buf).map_err(|e| UtilError::IoError(e))?;
+        let mut f = File::open("/dev/urandom")?;
+        f.read_exact(buf)?;
         Ok(())
     }
 
