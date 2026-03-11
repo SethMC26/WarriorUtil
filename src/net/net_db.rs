@@ -9,6 +9,8 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 
+use crate::utils::errors::UtilError;
+
 //TODO update with more merrimack Util like serialization
 #[derive(Serialize, Deserialize, Debug)]
 /// Represents a single host entry.
@@ -90,11 +92,12 @@ impl HostsDatabase {
     /// Returns Serialized database as a JSON string into the format from MerrimackUtil
     ///
     /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... }, ...] }`
-    pub fn to_json_str(&self) -> Result<String, Error> {
+    pub fn to_json_str(&self) -> Result<String, UtilError> {
         let values: Vec<&HostEntry> = self.host_map.values().collect();
         serde_json::to_string(&serde_json::json!({
             "hosts" : values
         }))
+        .map_err(|e| UtilError::JsonError(e))
     }
 
     /// Deserializes the format used in CS classes at Merrimack College for hosts into a `HostsDatabase`.
@@ -103,7 +106,7 @@ impl HostsDatabase {
     /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... }, ...] }`
     /// # Arguments
     /// * `json_str` String slice to turn into Hosts Database
-    pub fn from_json_str(json_str: &str) -> Result<Self, Error> {
+    pub fn from_json_str(json_str: &str) -> Result<Self, UtilError> {
         ///helper struct to turn the hosts array into a hash map using serde macros
         #[derive(Deserialize)]
         struct HostsArray {
@@ -126,10 +129,10 @@ impl HostsDatabase {
     ///Expects JSON of the form:
     /// `{ "hosts": [ { "host-name": "...", "address": "...", "port": ... }, ...] }`
     ///
-    pub fn from_file(file: &mut File) -> Result<Self, Error> {
+    pub fn from_file(file: &mut File) -> Result<Self, UtilError> {
         let mut json_str = String::new();
         //read contents of file into string
-        let _ = file.read_to_string(&mut json_str).map_err(Error::io)?;
+        let _ = file.read_to_string(&mut json_str)?;
         //turn string into json of hostDB
         Self::from_json_str(json_str.as_str())
     }

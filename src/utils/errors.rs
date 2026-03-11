@@ -19,6 +19,10 @@ pub enum UtilError {
     TimeError(SystemTimeError),
     /// Invalid input provided by caller
     InvalidInput(String),
+    /// Error with CLI
+    CLIError(String),
+    // JSON error with Serde
+    JsonError(serde_json::Error),
 }
 
 /// Generates a [`From`] impl to convert a foreign error type into [`UtilError`].
@@ -43,6 +47,7 @@ macro_rules! impl_from_error {
 // Implement the From trait for basic wrapping error
 impl_from_error!(SystemTimeError, TimeError);
 impl_from_error!(std::io::Error, IoError);
+impl_from_error!(serde_json::Error, JsonError);
 
 /// Display — human readable messages for each error
 impl fmt::Display for UtilError {
@@ -55,6 +60,10 @@ impl fmt::Display for UtilError {
             UtilError::TimeError(e) => write!(f, "system clock error: {}", e),
 
             UtilError::InvalidInput(msg) => write!(f, "invalid input: {}", msg),
+
+            UtilError::CLIError(msg) => write!(f, "CLI Error: {}", msg),
+
+            UtilError::JsonError(e) => write!(f, "JSON Error: {}", e),
         }
     }
 }
@@ -66,6 +75,7 @@ impl std::error::Error for UtilError {
         match self {
             UtilError::IoError(e) => Some(e),
             UtilError::TimeError(e) => Some(e),
+            UtilError::JsonError(e) => Some(e),
             _ => None,
         }
     }

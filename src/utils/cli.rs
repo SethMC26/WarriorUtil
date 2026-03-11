@@ -3,7 +3,10 @@
 // Author: Seth Holtzman
 // See LICENSE file in the project root for full license text.
 
+use crate::utils::errors::UtilError;
+use crate::utils::errors::UtilError::CLIError;
 use std::{collections::HashMap, env};
+
 /// Represents a command line option with both a short and long form.
 ///
 /// # Examples
@@ -92,7 +95,7 @@ pub fn options_string(ops: &[LongOp]) -> String {
 /// * If an argument doesn't start with `-` or `--`
 /// * If an unknown option is provided
 /// * If an option that requires a value is not followed by one
-pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<&LongOp, String>, String> {
+pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<&LongOp, String>, UtilError> {
     //make map to store ops
     let mut op_map: HashMap<&LongOp, String> = HashMap::new();
     let mut args = env::args().skip(1);
@@ -104,7 +107,7 @@ pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<&LongOp, String>, String> {
         } else if arg.starts_with("-") {
             ops.iter().find(|&op| op.short_op == arg[1..])
         } else {
-            return Err(format!("Expected but - or -- but got {}", arg));
+            return Err(CLIError(format!("Expected but - or -- but got {}", arg)));
         };
 
         //map option to argument
@@ -113,14 +116,14 @@ pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<&LongOp, String>, String> {
                 if op.has_arg {
                     let arg_val: String = args
                         .next()
-                        .ok_or(format!("Expected argument but none found"))?;
+                        .ok_or(CLIError(format!("Expected argument but none found")))?;
                     op_map.insert(op, arg_val);
                 } else {
                     op_map.insert(op, "".into());
                 }
             }
             None => {
-                return Err(format!("Unknown Option {}", arg));
+                return Err(CLIError(format!("Unknown Option {}", arg)));
             }
         }
     }
