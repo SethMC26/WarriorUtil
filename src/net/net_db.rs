@@ -4,7 +4,6 @@
 // See LICENSE file in the project root for full license text.
 
 use serde::{Deserialize, Serialize};
-use serde_json::Error;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
@@ -97,7 +96,7 @@ impl HostsDatabase {
         serde_json::to_string(&serde_json::json!({
             "hosts" : values
         }))
-        .map_err(|e| UtilError::JsonError(e))
+        .map_err(UtilError::JsonError)
     }
 
     /// Deserializes the format used in CS classes at Merrimack College for hosts into a `HostsDatabase`.

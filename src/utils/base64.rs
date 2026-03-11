@@ -110,7 +110,7 @@ pub fn encode(bytes: &[u8]) -> String {
             base64_string.push(char_2);
             base64_string.push(char_3);
             // Add 1 padding char
-            base64_string.push_str("=");
+            base64_string.push('=');
         }
         _ => unreachable!(), // x mod 3 will always be between 0-2(galois died for this)
     }

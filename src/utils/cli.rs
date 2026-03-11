@@ -116,7 +116,7 @@ pub fn get_op_map(ops: &[LongOp]) -> Result<HashMap<&LongOp, String>, UtilError>
                 if op.has_arg {
                     let arg_val: String = args
                         .next()
-                        .ok_or(CLIError(format!("Expected argument but none found")))?;
+                        .ok_or(CLIError("Expected argument but none found".to_string()))?;
                     op_map.insert(op, arg_val);
                 } else {
                     op_map.insert(op, "".into());
