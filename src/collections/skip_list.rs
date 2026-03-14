@@ -83,14 +83,17 @@ where
 
         //Check if new element should be new root head(smallest element)
         //for adding a new head we do not do coin flips since new head points to every skip list anyways
-        if &root_head.borrow().value > &new_head.borrow().value {
+        if root_head.borrow().value > new_head.borrow().value {
             let mut new_node = new_head.borrow_mut();
-            //have new node point to each list 
+
+            //have new node point to each list, skip first we already added it
             for node in &root_head.borrow().next_nodes {
                 new_node.next_nodes.push(node.clone());
             }
-            //add root head back to list 
-            new_node.next_nodes[0] = root_head.clone();
+            
+            //add root head back to list
+            new_node.set_next(root_head.clone(), 0);
+
             self.head = Some(new_head.clone());
             return;
         }
@@ -104,6 +107,64 @@ where
             Self::insert_into_list(root_head.clone(), new_head.clone(), i);
             i += 1;
         }
+    }
+
+    /// Searches for `value` in the skip list.
+    /// 
+    /// # Arguments
+    /// * `value` - The value to search for
+    ///
+    /// # Returns
+    /// `true` if `value` is in the skip list, `false` otherwise
+    pub fn search(&self, value: T) -> bool {
+        //get current root head
+        let mut curr_head: Head<T> = match &self.head {
+            Some(head) => head.clone(),
+            None => {
+                return false; //empty list
+            }
+        };
+
+        //get total number of lists 
+        let mut list_i: usize = curr_head.borrow().next_nodes.len().saturating_sub(1);
+
+        loop {
+            //found item
+            if curr_head.borrow().value == value {
+                return true;
+            }
+
+            //get next node 
+            let next_node = match curr_head.borrow().next_nodes.get(list_i) {
+                Some(node) => node.clone(),
+                None => {
+                    //cannot decrement break
+                    if list_i == 0 {
+                        break;
+                    }
+                    //cannot decrement
+                    list_i -= 1;
+                    continue;
+                }
+            };
+
+            if next_node.borrow().value <= value {
+                //go to next node
+                curr_head = next_node;
+                continue;
+            }
+
+            //cannot decrement so break
+            if list_i == 0 {
+                break;
+            }
+
+            //we next_node.value > value so not in this list try the list below 
+            list_i -= 1;
+        }
+
+        //not in list
+        return false;
     }
 
     /// Inserts `new_head` into the linked list at the given level, maintaining sorted order.
@@ -127,13 +188,13 @@ where
 
             //need to use if statement here instead of match since borrow will be dropped after condition executes
             if let Some(next_head) = next_head {
-                if &next_head.borrow().value > &new_head.borrow().value {
-                    //new value should be inserted here 
+                if next_head.borrow().value > new_head.borrow().value {
+                    //new value should be inserted here
                     //wire up forward pointers, set curr_head to point ot new node and new node to point at next node
                     curr_head.borrow_mut().set_next(new_head.clone(), list);
                     new_head.borrow_mut().set_next(next_head.clone(), list);
                     return;
-                } else if &next_head.borrow().value == &new_head.borrow().value {
+                } else if next_head.borrow().value == new_head.borrow().value {
                     return; //value aready in skip list ya dummy 
                 } else {
                     curr_head = next_head.clone(); // go to loop iteration 
@@ -161,7 +222,7 @@ where
 /// Higher levels show only promoted nodes; absent nodes are rendered as blank
 /// columns to preserve alignment with level 0.
 ///
-/// VIBE CODED!!!! ALERT 
+/// VIBE CODED!!!! ALERT
 /// # Author
 /// claude
 impl<T: Ord + fmt::Display> fmt::Display for SkipList<T> {
@@ -180,7 +241,7 @@ impl<T: Ord + fmt::Display> fmt::Display for SkipList<T> {
                 let next = {
                     let node = rc.borrow();
                     all_values.push(node.value.to_string());
-                    node.next_nodes.get(0).cloned()
+                    node.next_nodes.first().cloned()
                 };
                 curr = next;
             }
@@ -196,12 +257,16 @@ impl<T: Ord + fmt::Display> fmt::Display for SkipList<T> {
         // participates in every level by definition.
         let max_level = head.borrow().next_nodes.len();
 
-        writeln!(f, "SkipList ({} levels, {} nodes):", max_level, all_values.len())?;
+        writeln!(
+            f,
+            "SkipList ({} levels, {} nodes):",
+            max_level,
+            all_values.len()
+        )?;
         writeln!(f, "{}", "-".repeat(col_width * all_values.len() + 6))?;
 
         // Print levels from highest to lowest so the sparsest list is on top.
         for i in (0..max_level).rev() {
-
             // Collect values present at this level by traversing from head.
             let mut level_values: Vec<String> = Vec::new();
             let mut level_count = 0;
