@@ -28,6 +28,7 @@
 use std::error::Error;
 use std::io;
 use std::time::{SystemTime, UNIX_EPOCH};
+use warrior_util::net::net_db::HostsDatabase;
 use warrior_util::utils::errors::UtilError;
 
 #[test]
@@ -57,15 +58,25 @@ fn test_util_error_source() {
         let err = UtilError::TimeError(e);
         assert!(err.source().is_some());
     }
+
+    //use bad json to get error
+    let bad_json = r#"
+    bad json"hosts":[ {"port": 8080, "host-name": "localhost", "address": "127.0.0.1"} ]
+    "#;
+
+    assert!(HostsDatabase::from_json_str(bad_json).is_err_and(|e| e.source().is_some()))
 }
 
 #[test]
-/// Negative test: LockPoisoned and InvalidInput have no error source
+/// Negative test: LockPoisoned, CLIError and  InvalidInput have no error source
 fn test_util_error_no_source() {
     let err = UtilError::LockPoisoned("panic".to_string());
     assert!(err.source().is_none());
 
     let err = UtilError::InvalidInput("bad value".to_string());
+    assert!(err.source().is_none());
+
+    let err = UtilError::CLIError("Bad arguments".to_string());
     assert!(err.source().is_none());
 }
 
