@@ -10,5 +10,6 @@
 //! ## Modules
 //! - [`utils`] - Utility types including [`utils::nonce_cache::NonceCache`]
 
+pub mod collections;
 pub mod net;
 pub mod utils;

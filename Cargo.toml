@@ -35,3 +35,7 @@ path = "examples/cli/cli.rs"
 [[example]]
 name = "base64"
 path = "examples/base64/base64.rs"
+
+[[example]]
+name = "skip_list"
+path = "examples/collections/skip_list.rs"
