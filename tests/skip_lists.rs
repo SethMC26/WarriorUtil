@@ -38,7 +38,7 @@ use warrior_util::collections::skip_list::SkipList;
 fn test_insert_empty() {
     let mut list = SkipList::new();
     list.insert(5);
-    assert!(list.search(5));
+    assert!(list.exists(5));
 }
 
 #[test]
@@ -49,10 +49,10 @@ fn test_insert_middle_then_end() {
     list.insert(20);
     list.insert(15); // middle
     list.insert(25); // end
-    assert!(list.search(10));
-    assert!(list.search(15));
-    assert!(list.search(20));
-    assert!(list.search(25));
+    assert!(list.exists(10));
+    assert!(list.exists(15));
+    assert!(list.exists(20));
+    assert!(list.exists(25));
 }
 
 #[test]
@@ -63,10 +63,10 @@ fn test_insert_middle_then_beginning() {
     list.insert(20);
     list.insert(15); // middle
     list.insert(5); // beginning
-    assert!(list.search(5));
-    assert!(list.search(10));
-    assert!(list.search(15));
-    assert!(list.search(20));
+    assert!(list.exists(5));
+    assert!(list.exists(10));
+    assert!(list.exists(15));
+    assert!(list.exists(20));
 }
 
 #[test]
@@ -78,11 +78,11 @@ fn test_insert_middle_then_both_ends() {
     list.insert(15); // middle
     list.insert(25); // end
     list.insert(5); // beginning
-    assert!(list.search(5));
-    assert!(list.search(10));
-    assert!(list.search(15));
-    assert!(list.search(20));
-    assert!(list.search(25));
+    assert!(list.exists(5));
+    assert!(list.exists(10));
+    assert!(list.exists(15));
+    assert!(list.exists(20));
+    assert!(list.exists(25));
 }
 
 #[test]
@@ -97,7 +97,7 @@ fn test_insert_multiple_middle() {
     list.insert(50); // end
     list.insert(5); // beginning
     for &val in &[5, 10, 20, 25, 30, 40, 50] {
-        assert!(list.search(val), "Should find {}", val);
+        assert!(list.exists(val), "Should find {}", val);
     }
 }
 
@@ -111,7 +111,7 @@ fn test_insert_adjacent_middle() {
     list.insert(21); // adjacent to middle
     list.insert(19); // just before middle
     for &val in &[10, 19, 20, 21, 30] {
-        assert!(list.search(val), "Should find {}", val);
+        assert!(list.exists(val), "Should find {}", val);
     }
 }
 
@@ -119,7 +119,7 @@ fn test_insert_adjacent_middle() {
 /// Negative test: Search on empty list returns false
 fn test_search_empty() {
     let list: SkipList<i32> = SkipList::new();
-    assert!(!list.search(1));
+    assert!(!list.exists(1));
 }
 
 #[test]
@@ -127,8 +127,8 @@ fn test_search_empty() {
 fn test_search_single_element() {
     let mut list = SkipList::new();
     list.insert(5);
-    assert!(list.search(5));
-    assert!(!list.search(3));
+    assert!(list.exists(5));
+    assert!(!list.exists(3));
 }
 
 #[test]
@@ -137,7 +137,7 @@ fn test_search_head() {
     let mut list = SkipList::new();
     list.insert(5);
     list.insert(3);
-    assert!(list.search(3));
+    assert!(list.exists(3));
 }
 
 #[test]
@@ -147,7 +147,7 @@ fn test_search_tail() {
     list.insert(1);
     list.insert(2);
     list.insert(3);
-    assert!(list.search(3));
+    assert!(list.exists(3));
 }
 
 #[test]
@@ -157,9 +157,9 @@ fn test_search_missing() {
     list.insert(1);
     list.insert(3);
     list.insert(5);
-    assert!(!list.search(2));
-    assert!(!list.search(4));
-    assert!(!list.search(6));
+    assert!(!list.exists(2));
+    assert!(!list.exists(4));
+    assert!(!list.exists(6));
 }
 
 #[test]
@@ -170,10 +170,10 @@ fn test_search_many() {
         list.insert(i);
     }
     for i in 0..100 {
-        assert!(list.search(i), "should find {}", i);
+        assert!(list.exists(i), "should find {}", i);
     }
-    assert!(!list.search(100));
-    assert!(!list.search(-1));
+    assert!(!list.exists(100));
+    assert!(!list.exists(-1));
 }
 
 #[test]
@@ -183,9 +183,9 @@ fn test_search_new_minimum() {
     list.insert(5);
     list.insert(3);
     list.insert(1);
-    assert!(list.search(1));
-    assert!(list.search(3));
-    assert!(list.search(5));
+    assert!(list.exists(1));
+    assert!(list.exists(3));
+    assert!(list.exists(5));
 }
 
 #[test]
@@ -194,7 +194,7 @@ fn test_search_duplicate() {
     let mut list = SkipList::new();
     list.insert(5);
     list.insert(5);
-    assert!(list.search(5));
+    assert!(list.exists(5));
 }
 
 #[test]
@@ -204,9 +204,9 @@ fn test_negative_numbers() {
     list.insert(-10);
     list.insert(0);
     list.insert(10);
-    assert!(list.search(-10));
-    assert!(list.search(0));
-    assert!(list.search(10));
+    assert!(list.exists(-10));
+    assert!(list.exists(0));
+    assert!(list.exists(10));
 }
 
 #[test]
@@ -216,9 +216,9 @@ fn test_boundary_values() {
     list.insert(i32::MIN);
     list.insert(0);
     list.insert(i32::MAX);
-    assert!(list.search(i32::MIN));
-    assert!(list.search(0));
-    assert!(list.search(i32::MAX));
+    assert!(list.exists(i32::MIN));
+    assert!(list.exists(0));
+    assert!(list.exists(i32::MAX));
 }
 
 #[test]
@@ -230,7 +230,7 @@ fn test_random_insertion_order() {
         list.insert(val);
     }
     for &val in &values {
-        assert!(list.search(val), "Should find {}", val);
+        assert!(list.exists(val), "Should find {}", val);
     }
-    assert!(!list.search(100)); // not inserted
+    assert!(!list.exists(100)); // not inserted
 }

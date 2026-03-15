@@ -9,6 +9,7 @@ use std::fs::File;
 use std::io::Read;
 use std::rc::Rc;
 
+///type alias for node pointer
 type Head<T> = Rc<RefCell<Node<T>>>;
 
 /// A node in the skip list containing a value and forward pointers to the next node in each list that this node is in in.
@@ -42,6 +43,7 @@ where
 /// SkipList collection on average O(lg(n)) insert and search
 /// We can insert any element that implements Ord(ordering) which is similar to comparable in java
 /// `head` - Current Head of the skip list which points to all levels
+#[derive(Default)]
 pub struct SkipList<T: Ord> {
     head: Option<Head<T>>,
 }
@@ -90,7 +92,6 @@ where
             for node in &root_head.borrow().next_nodes {
                 new_node.next_nodes.push(node.clone());
             }
-            
             //add root head back to list
             new_node.set_next(root_head.clone(), 0);
 
@@ -102,39 +103,59 @@ where
         Self::insert_into_list(root_head.clone(), new_head.clone(), 0);
 
         //while we get "heads" promote node to the next
-        let mut i: usize = 1;
+        let mut lists: usize = 1;
         while Self::coin_flip() {
-            Self::insert_into_list(root_head.clone(), new_head.clone(), i);
-            i += 1;
+            Self::insert_into_list(root_head.clone(), new_head.clone(), lists);
+            lists += 1;
         }
     }
 
-    /// Searches for `value` in the skip list.
-    /// 
+    /// Test if `value` exists in the skip list.
+    ///
     /// # Arguments
     /// * `value` - The value to search for
     ///
     /// # Returns
     /// `true` if `value` is in the skip list, `false` otherwise
-    pub fn search(&self, value: T) -> bool {
+    pub fn exists(&self, value: T) -> bool {
+        return self.search(value).is_some();
+    }
+
+    /// Gets cloned `value` from skipList  
+    ///
+    /// # Arguments
+    /// * `value` - The value to search for
+    ///
+    /// # Returns
+    /// T `value` if `value` is in the skip list, None otherwise
+    pub fn get(&self, value: T) -> Option<T>
+    where
+        T: Clone,
+    {
+        match self.search(value) {
+            Some(node) => return Some(node.borrow().value.clone()),
+            None => return None,
+        }
+    }
+
+    fn search(&self, value: T) -> Option<Head<T>> {
         //get current root head
         let mut curr_head: Head<T> = match &self.head {
             Some(head) => head.clone(),
             None => {
-                return false; //empty list
+                return None; //empty list
             }
         };
 
-        //get total number of lists 
+        if curr_head.borrow().value == value {
+            return Some(curr_head);
+        }
+
+        //get total number of lists
         let mut list_i: usize = curr_head.borrow().next_nodes.len().saturating_sub(1);
 
         loop {
-            //found item
-            if curr_head.borrow().value == value {
-                return true;
-            }
-
-            //get next node 
+            //get next node
             let next_node = match curr_head.borrow().next_nodes.get(list_i) {
                 Some(node) => node.clone(),
                 None => {
@@ -142,29 +163,32 @@ where
                     if list_i == 0 {
                         break;
                     }
-                    //cannot decrement
+                    //go to next list
                     list_i -= 1;
                     continue;
                 }
             };
 
-            if next_node.borrow().value <= value {
+            if next_node.borrow().value < value {
                 //go to next node
                 curr_head = next_node;
                 continue;
-            }
+            } else if next_node.borrow().value > value {
+                //cannot decrement so break
+                if list_i == 0 {
+                    break;
+                }
 
-            //cannot decrement so break
-            if list_i == 0 {
-                break;
+                //not in this list so go to next one
+                list_i -= 1;
+            } else {
+                //found item
+                return Some(next_node);
             }
-
-            //we next_node.value > value so not in this list try the list below 
-            list_i -= 1;
         }
 
         //not in list
-        return false;
+        return None;
     }
 
     /// Inserts `new_head` into the linked list at the given level, maintaining sorted order.
