@@ -147,6 +147,7 @@ where
             }
         };
 
+        //check if head is value
         if curr_head.borrow().value == value {
             return Some(curr_head);
         }
@@ -156,17 +157,13 @@ where
 
         loop {
             //get next node
-            let next_node = match curr_head.borrow().next_nodes.get(list_i) {
-                Some(node) => node.clone(),
-                None => {
-                    //cannot decrement break
-                    if list_i == 0 {
-                        break;
-                    }
-                    //go to next list
-                    list_i -= 1;
-                    continue;
-                }
+            let Some(next_node) = curr_head.borrow().next_nodes.get(list_i).cloned() else {
+                //if no next node attempt to go to next list 
+                list_i = match list_i.checked_sub(1) {
+                    Some(i) => i,
+                    None => break, //no list exists break loop
+                };
+                continue;
             };
 
             if next_node.borrow().value < value {
@@ -174,13 +171,11 @@ where
                 curr_head = next_node;
                 continue;
             } else if next_node.borrow().value > value {
-                //cannot decrement so break
-                if list_i == 0 {
-                    break;
-                }
-
-                //not in this list so go to next one
-                list_i -= 1;
+                //attempt to go to next list if none then break
+                list_i = match list_i.checked_sub(1) {
+                    Some(i) => i,
+                    None => break
+                };
             } else {
                 //found item
                 return Some(next_node);
