@@ -3,7 +3,7 @@
 // Author: Seth Holtzman
 // See LICENSE file in the project root for full license text.
 
-use warrior_util::collections::skip_list::SkipList;
+use warrior_util::{collections::skip_list::SkipList, skip_list};
 
 fn main() {
     //VIBED CODED ALERT THE EXAMPLES HAS BEEN VIBED
@@ -19,35 +19,45 @@ fn main() {
     let values = [10, 5, 15, 3, 7, 12, 18, 1, 20];
     for &value in &values {
         list.insert(value);
-        println!("  Inserted: {}", value);
     }
+    println!("Inserted values: {:?}", values);
 
     println!("\n2. Visual representation of the SkipList:");
     println!("{}", list);
 
-    println!("\n3. Searching for elements:");
-    for &value in &[1, 5, 10, 15, 20, 25] {
-        let found = list.search(value);
-        println!("  Search for {}: {}", value, if found { "Found" } else { "Not found" });
+    println!("\n3. Checking if elements exist:");
+    for &value in &[5, 10, 25] {
+        let exists = list.exists(&value);
+        println!("Does {} exist? {}", value, exists);
     }
 
-    println!("\n4. SkipList properties:");
-    println!("  - Maintains sorted order automatically");
-    println!("  - Average O(log n) time for insert/search");
-    println!("  - Uses probabilistic balancing (coin flips)");
-    println!("  - No duplicates allowed (silently ignored)");
+    println!("\n4. Getting elements:");
+    for &value in &[5, 10, 25] {
+        match list.get(&value) {
+            Some(val) => println!("Got {}: {}", value, val),
+            None => println!("{} not found", value),
+        }
+    }
 
-    println!("\n5. Demonstrating duplicate insertion:");
-    println!("  Attempting to insert 10 again...");
-    list.insert(10); // This will be ignored
-    println!("  Search for 10: {}", if list.search(10) { "Still found" } else { "Lost!" });
+    println!("\n5. Deleting elements:");
+    println!("Before deletion:");
+    println!("{}", list);
+    list.delete(&5);
+    list.delete(&15);
+    list.delete(&25); // doesn't exist, should do nothing
+    println!("After deleting 5 and 15:");
+    println!("{}", list);
 
-    println!("\n6. Large dataset performance:");
+    println!("\n6. Large dataset example:");
     let mut large_list = SkipList::new();
-    for i in (0..100).rev() { // Insert in reverse order
+    for i in 0..25 {
         large_list.insert(i);
     }
-    println!("  Inserted 100 elements in reverse order");
-    println!("  Search for 50: {}", if large_list.search(50) { "Found" } else { "Not found" });
-    println!("  Search for 150: {}", if large_list.search(150) { "Found" } else { "Not found" });
+    println!("Large list with 25 elements:");
+    println!("{}", large_list);
+
+    println!("\n7. Using the skip_list! macro:");
+    let macro_list = skip_list![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    println!("List created with macro:");
+    println!("{}", macro_list);
 }
