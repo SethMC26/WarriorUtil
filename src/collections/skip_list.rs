@@ -135,8 +135,8 @@ where
     ///
     /// # Returns
     /// `true` if `value` is in the skip list, `false` otherwise
-    pub fn exists(&self, value: T) -> bool {
-        return self.search(&value).is_some();
+    pub fn exists(&self, value: &T) -> bool {
+        return self.search(value).is_some();
     }
 
     /// Gets cloned `value` from skipList  
@@ -240,7 +240,7 @@ where
     fn search_prev(&self, value: &T) -> Option<(Head<T>, usize)> {
         //get current root head
         let mut curr_head = self.head.clone()?;
-        
+
         //check if head is value
         if curr_head.borrow().value == *value {
             return None;

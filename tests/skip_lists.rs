@@ -38,7 +38,7 @@ use warrior_util::collections::skip_list::SkipList;
 fn test_insert_empty() {
     let mut list = SkipList::new();
     list.insert(5);
-    assert!(list.exists(5));
+    assert!(list.exists(&5));
 }
 
 #[test]
@@ -49,10 +49,10 @@ fn test_insert_middle_then_end() {
     list.insert(20);
     list.insert(15); // middle
     list.insert(25); // end
-    assert!(list.exists(10));
-    assert!(list.exists(15));
-    assert!(list.exists(20));
-    assert!(list.exists(25));
+    assert!(list.exists(&10));
+    assert!(list.exists(&15));
+    assert!(list.exists(&20));
+    assert!(list.exists(&25));
 }
 
 #[test]
@@ -63,10 +63,10 @@ fn test_insert_middle_then_beginning() {
     list.insert(20);
     list.insert(15); // middle
     list.insert(5); // beginning
-    assert!(list.exists(5));
-    assert!(list.exists(10));
-    assert!(list.exists(15));
-    assert!(list.exists(20));
+    assert!(list.exists(&5));
+    assert!(list.exists(&10));
+    assert!(list.exists(&15));
+    assert!(list.exists(&20));
 }
 
 #[test]
@@ -78,11 +78,11 @@ fn test_insert_middle_then_both_ends() {
     list.insert(15); // middle
     list.insert(25); // end
     list.insert(5); // beginning
-    assert!(list.exists(5));
-    assert!(list.exists(10));
-    assert!(list.exists(15));
-    assert!(list.exists(20));
-    assert!(list.exists(25));
+    assert!(list.exists(&5));
+    assert!(list.exists(&10));
+    assert!(list.exists(&15));
+    assert!(list.exists(&20));
+    assert!(list.exists(&25));
 }
 
 #[test]
@@ -97,7 +97,7 @@ fn test_insert_multiple_middle() {
     list.insert(50); // end
     list.insert(5); // beginning
     for &val in &[5, 10, 20, 25, 30, 40, 50] {
-        assert!(list.exists(val), "Should find {}", val);
+        assert!(list.exists(&val), "Should find {}", val);
     }
 }
 
@@ -111,7 +111,7 @@ fn test_insert_adjacent_middle() {
     list.insert(21); // adjacent to middle
     list.insert(19); // just before middle
     for &val in &[10, 19, 20, 21, 30] {
-        assert!(list.exists(val), "Should find {}", val);
+        assert!(list.exists(&val), "Should find {}", val);
     }
 }
 
@@ -119,7 +119,7 @@ fn test_insert_adjacent_middle() {
 /// Negative test: Search on empty list returns false
 fn test_search_empty() {
     let list: SkipList<i32> = SkipList::new();
-    assert!(!list.exists(1));
+    assert!(!list.exists(&1));
 }
 
 #[test]
@@ -127,8 +127,8 @@ fn test_search_empty() {
 fn test_search_single_element() {
     let mut list = SkipList::new();
     list.insert(5);
-    assert!(list.exists(5));
-    assert!(!list.exists(3));
+    assert!(list.exists(&5));
+    assert!(!list.exists(&3));
 }
 
 #[test]
@@ -137,7 +137,7 @@ fn test_search_head() {
     let mut list = SkipList::new();
     list.insert(5);
     list.insert(3);
-    assert!(list.exists(3));
+    assert!(list.exists(&3));
 }
 
 #[test]
@@ -147,7 +147,7 @@ fn test_search_tail() {
     list.insert(1);
     list.insert(2);
     list.insert(3);
-    assert!(list.exists(3));
+    assert!(list.exists(&3));
 }
 
 #[test]
@@ -157,9 +157,9 @@ fn test_search_missing() {
     list.insert(1);
     list.insert(3);
     list.insert(5);
-    assert!(!list.exists(2));
-    assert!(!list.exists(4));
-    assert!(!list.exists(6));
+    assert!(!list.exists(&2));
+    assert!(!list.exists(&4));
+    assert!(!list.exists(&6));
 }
 
 #[test]
@@ -170,10 +170,10 @@ fn test_search_many() {
         list.insert(i);
     }
     for i in 0..100 {
-        assert!(list.exists(i), "should find {}", i);
+        assert!(list.exists(&i), "should find {}", i);
     }
-    assert!(!list.exists(100));
-    assert!(!list.exists(-1));
+    assert!(!list.exists(&100));
+    assert!(!list.exists(&-1));
 }
 
 #[test]
@@ -183,9 +183,9 @@ fn test_search_new_minimum() {
     list.insert(5);
     list.insert(3);
     list.insert(1);
-    assert!(list.exists(1));
-    assert!(list.exists(3));
-    assert!(list.exists(5));
+    assert!(list.exists(&1));
+    assert!(list.exists(&3));
+    assert!(list.exists(&5));
 }
 
 #[test]
@@ -194,7 +194,7 @@ fn test_search_duplicate() {
     let mut list = SkipList::new();
     list.insert(5);
     list.insert(5);
-    assert!(list.exists(5));
+    assert!(list.exists(&5));
 }
 
 #[test]
@@ -204,9 +204,9 @@ fn test_negative_numbers() {
     list.insert(-10);
     list.insert(0);
     list.insert(10);
-    assert!(list.exists(-10));
-    assert!(list.exists(0));
-    assert!(list.exists(10));
+    assert!(list.exists(&-10));
+    assert!(list.exists(&0));
+    assert!(list.exists(&10));
 }
 
 #[test]
@@ -216,9 +216,9 @@ fn test_boundary_values() {
     list.insert(i32::MIN);
     list.insert(0);
     list.insert(i32::MAX);
-    assert!(list.exists(i32::MIN));
-    assert!(list.exists(0));
-    assert!(list.exists(i32::MAX));
+    assert!(list.exists(&i32::MIN));
+    assert!(list.exists(&0));
+    assert!(list.exists(&i32::MAX));
 }
 
 #[test]
@@ -230,9 +230,9 @@ fn test_random_insertion_order() {
         list.insert(val);
     }
     for &val in &values {
-        assert!(list.exists(val), "Should find {}", val);
+        assert!(list.exists(&val), "Should find {}", val);
     }
-    assert!(!list.exists(100)); // not inserted
+    assert!(!list.exists(&100)); // not inserted
 }
 #[test]
 fn test_insert_and_exists() {
@@ -240,22 +240,22 @@ fn test_insert_and_exists() {
     list.insert(5);
     list.insert(3);
     list.insert(8);
-    assert!(list.exists(5));
-    assert!(list.exists(3));
-    assert!(list.exists(8));
+    assert!(list.exists(&5));
+    assert!(list.exists(&3));
+    assert!(list.exists(&8));
 }
 
 #[test]
 fn test_exists_not_found() {
     let mut list = SkipList::new();
     list.insert(5);
-    assert!(!list.exists(99));
+    assert!(!list.exists(&99));
 }
 
 #[test]
 fn test_exists_empty() {
     let list: SkipList<i32> = SkipList::new();
-    assert!(!list.exists(1));
+    assert!(!list.exists(&1));
 }
 
 #[test]
@@ -283,7 +283,7 @@ fn test_duplicate_insert() {
     let mut list = SkipList::new();
     list.insert(5);
     list.insert(5);
-    assert!(list.exists(5));
+    assert!(list.exists(&5));
 }
 
 #[test]
@@ -293,7 +293,7 @@ fn test_insert_ascending_order() {
         list.insert(i);
     }
     for i in 0..10 {
-        assert!(list.exists(i));
+        assert!(list.exists(&i));
     }
 }
 
@@ -304,7 +304,7 @@ fn test_insert_descending_order() {
         list.insert(i);
     }
     for i in 0..10 {
-        assert!(list.exists(i));
+        assert!(list.exists(&i));
     }
 }
 
@@ -316,7 +316,7 @@ fn test_insert_random_order() {
         list.insert(v);
     }
     for &v in &values {
-        assert!(list.exists(v));
+        assert!(list.exists(&v));
     }
 }
 
@@ -327,9 +327,9 @@ fn test_delete_middle() {
     list.insert(2);
     list.insert(3);
     list.delete(&2);
-    assert!(!list.exists(2));
-    assert!(list.exists(1));
-    assert!(list.exists(3));
+    assert!(!list.exists(&2));
+    assert!(list.exists(&1));
+    assert!(list.exists(&3));
 }
 
 #[test]
@@ -339,9 +339,9 @@ fn test_delete_tail() {
     list.insert(2);
     list.insert(3);
     list.delete(&3);
-    assert!(!list.exists(3));
-    assert!(list.exists(1));
-    assert!(list.exists(2));
+    assert!(!list.exists(&3));
+    assert!(list.exists(&1));
+    assert!(list.exists(&2));
 }
 
 #[test]
@@ -350,8 +350,8 @@ fn test_delete_not_found() {
     list.insert(1);
     list.insert(2);
     list.delete(&99);
-    assert!(list.exists(1));
-    assert!(list.exists(2));
+    assert!(list.exists(&1));
+    assert!(list.exists(&2));
 }
 
 #[test]
@@ -365,7 +365,7 @@ fn test_delete_only_element() {
     let mut list = SkipList::new();
     list.insert(1);
     list.delete(&1);
-    assert!(!list.exists(1));
+    assert!(!list.exists(&1));
 }
 
 #[test]
@@ -373,9 +373,9 @@ fn test_delete_then_reinsert() {
     let mut list = SkipList::new();
     list.insert(5);
     list.delete(&5);
-    assert!(!list.exists(5));
+    assert!(!list.exists(&5));
     list.insert(5);
-    assert!(list.exists(5));
+    assert!(list.exists(&5));
 }
 
 #[test]
@@ -385,9 +385,9 @@ fn test_delete_promoted_node() {
         list.insert(i);
     }
     list.delete(&25);
-    assert!(!list.exists(25));
-    assert!(list.exists(24));
-    assert!(list.exists(26));
+    assert!(!list.exists(&25));
+    assert!(list.exists(&24));
+    assert!(list.exists(&26));
 }
 
 #[test]
@@ -397,7 +397,7 @@ fn test_large_insert() {
         list.insert(i);
     }
     for i in 0..100 {
-        assert!(list.exists(i));
+        assert!(list.exists(&i));
     }
 }
 
@@ -412,9 +412,9 @@ fn test_large_delete() {
     }
     for i in 0..100 {
         if i % 2 == 0 {
-            assert!(!list.exists(i));
+            assert!(!list.exists(&i));
         } else {
-            assert!(list.exists(i));
+            assert!(list.exists(&i));
         }
     }
 }
@@ -425,8 +425,8 @@ fn test_delete_head_two_elements() {
     list.insert(1);
     list.insert(2);
     list.delete(&1);
-    assert!(!list.exists(1));
-    assert!(list.exists(2));
+    assert!(!list.exists(&1));
+    assert!(list.exists(&2));
 }
 
 #[test]
@@ -435,8 +435,8 @@ fn test_delete_tail_two_elements() {
     list.insert(1);
     list.insert(2);
     list.delete(&2);
-    assert!(list.exists(1));
-    assert!(!list.exists(2));
+    assert!(list.exists(&1));
+    assert!(!list.exists(&2));
 }
 
 #[test]
@@ -446,9 +446,9 @@ fn test_delete_head_three_elements() {
     list.insert(2);
     list.insert(3);
     list.delete(&1);
-    assert!(!list.exists(1));
-    assert!(list.exists(2));
-    assert!(list.exists(3));
+    assert!(!list.exists(&1));
+    assert!(list.exists(&2));
+    assert!(list.exists(&3));
 }
 
 #[test]
@@ -458,13 +458,13 @@ fn test_delete_all_elements_one_by_one() {
         list.insert(i);
     }
     for i in 0..10 {
-        assert!(list.exists(i));
+        assert!(list.exists(&i));
         list.delete(&i);
-        assert!(!list.exists(i));
+        assert!(!list.exists(&i));
     }
     // List should be empty
     for i in 0..10 {
-        assert!(!list.exists(i));
+        assert!(!list.exists(&i));
     }
 }
 
@@ -475,9 +475,9 @@ fn test_delete_reverse_order() {
         list.insert(i);
     }
     for i in (0..10).rev() {
-        assert!(list.exists(i));
+        assert!(list.exists(&i));
         list.delete(&i);
-        assert!(!list.exists(i));
+        assert!(!list.exists(&i));
     }
 }
 
@@ -490,9 +490,9 @@ fn test_delete_random_order() {
     }
     let delete_order = vec![3, 7, 1, 9, 2, 6, 0, 8, 4, 5];
     for &v in &delete_order {
-        assert!(list.exists(v));
+        assert!(list.exists(&v));
         list.delete(&v);
-        assert!(!list.exists(v));
+        assert!(!list.exists(&v));
     }
 }
 
@@ -504,9 +504,9 @@ fn test_delete_non_existent_after_deletes() {
     list.insert(3);
     list.delete(&2);
     list.delete(&99); // Should not panic or change anything
-    assert!(list.exists(1));
-    assert!(!list.exists(2));
-    assert!(list.exists(3));
+    assert!(list.exists(&1));
+    assert!(!list.exists(&2));
+    assert!(list.exists(&3));
 }
 
 #[test]
@@ -516,8 +516,8 @@ fn test_delete_multiple_times() {
     list.insert(2);
     list.delete(&1);
     list.delete(&1); // Delete again, should be no-op
-    assert!(!list.exists(1));
-    assert!(list.exists(2));
+    assert!(!list.exists(&1));
+    assert!(list.exists(&2));
 }
 
 #[test]
@@ -534,9 +534,9 @@ fn test_delete_and_verify_remaining_sorted() {
     let mut prev = -1;
     for i in 0..20 {
         if i == 5 || i == 10 || i == 15 {
-            assert!(!list.exists(i));
+            assert!(!list.exists(&i));
         } else {
-            assert!(list.exists(i));
+            assert!(list.exists(&i));
             assert!(i > prev);
             prev = i;
         }
@@ -553,11 +553,11 @@ fn test_delete_promoted_head() {
     }
     // Assuming 0 is head and promoted
     list.delete(&0);
-    assert!(!list.exists(0));
-    assert!(list.exists(1));
+    assert!(!list.exists(&0));
+    assert!(list.exists(&1));
     // Verify structure by checking a few elements
     for i in 1..10 {
-        assert!(list.exists(i));
+        assert!(list.exists(&i));
     }
 }
 
@@ -568,5 +568,5 @@ fn test_delete_after_reinsert() {
     list.delete(&1);
     list.insert(1);
     list.delete(&1);
-    assert!(!list.exists(1));
+    assert!(!list.exists(&1));
 }

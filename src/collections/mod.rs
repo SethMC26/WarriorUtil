@@ -21,12 +21,10 @@ macro_rules! debug_panic {
 ///
 #[macro_export]
 macro_rules! skip_list {
-    ($($val:expr),*) => {
-        {
+    ($($val:expr),*) => {{
         let mut skip_list = $crate::collections::skip_list::SkipList::new();
         //insert a val for each time that val has appeared
         $(skip_list.insert($val);)*
         skip_list
-    }
-};
+    }}
 }

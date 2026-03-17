@@ -27,7 +27,7 @@ fn main() {
 
     println!("\n3. Checking if elements exist:");
     for &value in &[5, 10, 25] {
-        let exists = list.exists(value);
+        let exists = list.exists(&value);
         println!("Does {} exist? {}", value, exists);
     }
 
@@ -50,9 +50,9 @@ fn main() {
 
     println!("\n6. Large dataset example:");
     let mut large_list = SkipList::new();
-    for i in 0..25 { // Insert in reverse order
+    for i in 0..25 {
         large_list.insert(i);
-    }   
+    }
     println!("Large list with 25 elements:");
     println!("{}", large_list);
 
