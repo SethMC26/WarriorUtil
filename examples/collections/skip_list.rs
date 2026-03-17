@@ -3,7 +3,7 @@
 // Author: Seth Holtzman
 // See LICENSE file in the project root for full license text.
 
-use warrior_util::collections::skip_list::SkipList;
+use warrior_util::{collections::skip_list::SkipList, skip_list};
 
 fn main() {
     //VIBED CODED ALERT THE EXAMPLES HAS BEEN VIBED
@@ -32,4 +32,8 @@ fn main() {
     }
 
     println!("{}", large_list);
+
+    //also use skip_list macro
+    let list = skip_list![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    println!("{}", list);
 }
