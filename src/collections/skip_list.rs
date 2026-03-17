@@ -160,7 +160,7 @@ where
     ///
     /// # Arguments
     /// * `value` - The value to delete
-    /// 
+    ///
     /// # Note
     /// This method will do nothing if element does not exist
     pub fn delete(&mut self, value: &T) {
@@ -208,7 +208,7 @@ where
     }
 
     ///Search for 'value'. This method is a convient wrapper for `search_prev()` with implements the optimal algorithm
-    /// 
+    ///
     /// # Returns
     /// Node with `value` or None if not found
     fn search(&self, value: &T) -> Option<Head<T>> {
@@ -226,25 +226,21 @@ where
         };
 
         //use search prev
-        let Some((prev, list)) = self.search_prev(value) else {
-            return None;
-        };
+        let (prev, list) = self.search_prev(value)?;
 
         //this is safe since prev will be None if there is no next node(can't be a prev if there is no next)
-        return Some(prev.borrow().next_nodes[list].clone()); 
+        return Some(prev.borrow().next_nodes[list].clone());
     }
 
     ///Search for previous node to node that has 'value'. Recursively searches lists and returns the previous node in the highest skip list is exists in
-    /// 
-    /// Returns 
+    ///
+    /// Returns
     /// Some(Head<T>, Usize) - tuple with previous node and list it was found
-    /// None - Node not found, Node is head node, 
+    /// None - Node not found, Node is head node,
     fn search_prev(&self, value: &T) -> Option<(Head<T>, usize)> {
         //get current root head
-        let Some(mut curr_head) = self.head.clone() else {
-            return None;
-        };
-
+        let mut curr_head = self.head.clone()?;
+        
         //check if head is value
         if curr_head.borrow().value == *value {
             return None;
