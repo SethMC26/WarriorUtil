@@ -9,6 +9,8 @@ use std::fs::File;
 use std::io::Read;
 use std::rc::Rc;
 
+use crate::debug_panic;
+
 ///type alias for node pointer
 type Head<T> = Rc<RefCell<Node<T>>>;
 
@@ -37,6 +39,22 @@ where
         }
 
         self.next_nodes[list] = next;
+    }
+
+    ///Removes the
+    pub fn remove_next(&mut self, list: usize) {
+        let Some(to_delete) = self.next_nodes.get(list).cloned() else {
+            //use defensive assert(only triggers in debug) to help assert our worldview
+            debug_panic!("No node to remove caller is using this function wrong");
+            return;
+        };
+
+        let Some(new_next) = to_delete.borrow().next_nodes.get(list).cloned() else {
+            self.next_nodes.pop();
+            return;
+        };
+
+        self.next_nodes[list] = new_next;
     }
 }
 
@@ -118,7 +136,7 @@ where
     /// # Returns
     /// `true` if `value` is in the skip list, `false` otherwise
     pub fn exists(&self, value: T) -> bool {
-        return self.search(value).is_some();
+        return self.search(&value).is_some();
     }
 
     /// Gets cloned `value` from skipList  
@@ -128,7 +146,7 @@ where
     ///
     /// # Returns
     /// T `value` if `value` is in the skip list, None otherwise
-    pub fn get(&self, value: T) -> Option<T>
+    pub fn get(&self, value: &T) -> Option<T>
     where
         T: Clone,
     {
@@ -138,18 +156,98 @@ where
         }
     }
 
-    fn search(&self, value: T) -> Option<Head<T>> {
-        //get current root head
-        let mut curr_head: Head<T> = match &self.head {
-            Some(head) => head.clone(),
+    /// Deletes element with value 'T' from skiplist.
+    ///
+    /// # Arguments
+    /// * `value` - The value to delete
+    /// 
+    /// # Note
+    /// This method will do nothing if element does not exist
+    pub fn delete(&mut self, value: &T) {
+        //deal with edge cases: deleting head or empty list
+        match self.head.clone() {
+            Some(head) => {
+                //head is the value we are deleting
+                if head.borrow().value == *value {
+                    //get new head
+                    let Some(new_head) = head.borrow_mut().next_nodes.first().cloned() else {
+                        self.head = None; //There is only one element so table is now empty 
+                        return;
+                    };
+
+                    //we need to promote the new head to point at all the lists
+                    //start from list 1, list 0 is already done
+                    for i in 1..head.borrow().next_nodes.len() {
+                        let mut next_node = head.borrow().next_nodes[i].clone();
+                        //if the head's next element is the new_head then we need to get the next element to avoid cycles
+                        if next_node.borrow().value == new_head.borrow().value {
+                            let Some(node) = next_node.borrow().next_nodes.get(i).cloned() else {
+                                continue;
+                            };
+                            next_node = node;
+                        }
+                        //wire up new_head to point to list i
+                        new_head.borrow_mut().set_next(next_node, i);
+                    }
+
+                    self.head = Some(new_head);
+                    return;
+                }
+            }
+            //list is empty
+            None => return,
+        };
+
+        //for each list remove the next element and properly rewire lists
+        loop {
+            let Some((prev, list)) = self.search_prev(value) else {
+                return; //exit loop once there is no prev value, search prev will search all lists
+            };
+            prev.borrow_mut().remove_next(list);
+        }
+    }
+
+    ///Search for 'value'. This method is a convient wrapper for `search_prev()` with implements the optimal algorithm
+    /// 
+    /// # Returns
+    /// Node with `value` or None if not found
+    fn search(&self, value: &T) -> Option<Head<T>> {
+        match &self.head {
+            Some(head) => {
+                //head is the value
+                if head.borrow().value == *value {
+                    return Some(head.clone());
+                }
+            }
+            //list is empty
             None => {
                 return None; //empty list
             }
         };
 
+        //use search prev
+        let Some((prev, list)) = self.search_prev(value) else {
+            return None;
+        };
+
+        //this is safe since prev will be None if there is no next node(can't be a prev if there is no next)
+        return Some(prev.borrow().next_nodes[list].clone()); 
+    }
+
+    ///Search for previous node to node that has 'value'. Recursively searches lists and returns the previous node in the highest skip list is exists in
+    /// 
+    /// Returns 
+    /// Some(Head<T>, Usize) - tuple with previous node and list it was found
+    /// None - Node not found, Node is head node, 
+    fn search_prev(&self, value: &T) -> Option<(Head<T>, usize)> {
+        //get current root head
+        let Some(mut curr_head) = self.head.clone() else {
+            return None;
+        };
+
         //check if head is value
-        if curr_head.borrow().value == value {
-            return Some(curr_head);
+        if curr_head.borrow().value == *value {
+            return None;
         }
 
         //get total number of lists
@@ -158,7 +256,7 @@ where
         loop {
             //get next node
             let Some(next_node) = curr_head.borrow().next_nodes.get(list_i).cloned() else {
-                //if no next node attempt to go to next list 
+                //if no next node attempt to go to next list
                 list_i = match list_i.checked_sub(1) {
                     Some(i) => i,
                     None => break, //no list exists break loop
@@ -166,26 +264,25 @@ where
                 continue;
             };
 
-            if next_node.borrow().value < value {
+            if next_node.borrow().value < *value {
                 //go to next node
                 curr_head = next_node;
                 continue;
-            } else if next_node.borrow().value > value {
+            } else if next_node.borrow().value > *value {
                 //attempt to go to next list if none then break
                 list_i = match list_i.checked_sub(1) {
                     Some(i) => i,
-                    None => break
+                    None => break,
                 };
             } else {
                 //found item
-                return Some(next_node);
+                return Some((curr_head, list_i));
             }
         }
 
         //not in list
         return None;
     }
-
     /// Inserts `new_head` into the linked list at the given level, maintaining sorted order.
     ///
     /// Traverses the list at level `list` starting from `head` until it finds the
