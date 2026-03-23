@@ -55,6 +55,7 @@ This library provides the following utilities:
 - **Nonce Cache**: Thread-safe caching for nonces(number once) with configurable expiry, and nonce size. 
 - **Time Utilities**: Basic time utility similiar to in java `getCurrentTimeMillis()`
 - **Network Hosts Database**: JSON-based host database compatible with MerrimackUtil format. Used for networking/Network security projects at Merrimack College.
+- **Skip List**: Probabilistic ordered data structure with fast search, insert, and delete. As shown from Randomized Algorithms 
 
 ```rust
 // Base64 usage
@@ -81,30 +82,41 @@ let timestamp = current_time_millis().unwrap();
 use warrior_util::net::net_db::HostsDatabase;
 let json = r#"{"hosts": [{"host-name": "example.com", "address": "192.168.1.1", "port": 8080}]}"#;
 let db = HostsDatabase::from_json_str(json).unwrap();
+
+//skip_lists
+let list = skip_list![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+let exists = list.exists(&value);
+list.delete(&2);
+list.insert(11);
+
 ```
 
 ## 📁 Project structure
-- `examples/` – runnable demos (hosts database, JSON/serde usage, nonce cache)  
+- `examples/` – runnable demos (hosts database, JSON/serde usage, nonce cache, skip list)  
     - `hosts_database` - Examples for the Host Database
     - `json` - Examples of JSON
     - `nonce_cache` - Examples of nonce cache
     - `base64` - Example of base64 decoder/encoded
+    - `collections` - Examples for skip list and future data structures
 - `src/` – core library code  
     - `net/` - Network Database(hosts database)
     - `utils/` – nonce_cache, errors(for Utils module), time, cli, Base64 encoder/decoder
+    - `collections/` - Skip Lists
     - `lib.rs` Library exports
 - `Cargo.toml` – crate manifest
 
 ## Roadmap
-- JSON
-    - Custom traits, structs and marcos to help serde_json behave more like MerrimackUtil JSON
+- Random object
+    - Create wrapper for secure, and deterministic PRGs for use in projects
 - Crypto
     - Update with a Good Crypto crate, add examples and provide custom features to make working with crypto primitives easier
+    - We really need a good crypto crate
 - Nonce cache
     - Fix current hacky solution with a good secure Random 
 - Logging feature
-- Fun data structures like skip lists and bloom filters
-- CI/CD?
+- Fun data structures like ~~skip lists~~ and bloom filters
+- JSON
+    - Custom traits, structs and marcos to help serde_json behave more like MerrimackUtil JSON
 - Examples
     - Add networking examples
     - Add Crypto Examples
