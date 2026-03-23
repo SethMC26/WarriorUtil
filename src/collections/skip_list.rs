@@ -117,15 +117,72 @@ where
             return;
         }
 
-        //insert into root list(list 0)
-        Self::insert_into_list(root_head.clone(), new_head.clone(), 0);
-
         //while we get "heads" promote node to the next
-        let mut lists: usize = 1;
-        while Self::coin_flip() {
-            Self::insert_into_list(root_head.clone(), new_head.clone(), lists);
-            lists += 1;
+        let mut list_i: usize = 0;
+        while self.coin_flip() {
+            list_i += 1;
         }
+
+        //add all new levels to skip lists, since level is new root_head just points at new node
+        let old_len: usize = root_head.borrow().next_nodes.len();
+        if list_i > old_len {
+            let new_levels = list_i - old_len - 1;
+            for _ in 0..new_levels {
+                //use regular push since these are always new lists
+                root_head.borrow_mut().next_nodes.push(new_head.clone());
+            }
+            list_i = old_len.saturating_sub(1);
+        }
+
+        //we need two lists one to hold  all prev for prev-> new_node and one for new_node->next
+        //this is to avoid modifying skiplists while searching
+        let mut prev_nodes: Vec<Head<T>> = Vec::new();
+        let mut next_nodes: Vec<Head<T>> = Vec::new();
+
+        //set curr_head is where we start search
+        let mut curr_head: Head<T> = root_head;
+
+        //search the skiplists in optimal way keeping track of where the new_node should get added
+        loop {
+            //get next node
+            let Some(next_node) = curr_head.borrow().next_nodes.get(list_i).cloned() else {
+                //since there is no next node the new_head is new tail
+                prev_nodes.push(curr_head.clone());
+                //go to next list or break
+                list_i = match list_i.checked_sub(1) {
+                    Some(i) => i,
+                    None => break, //no list exists break loop
+                };
+                continue;
+            };
+
+            if next_node.borrow().value < new_head.borrow().value {
+                curr_head = next_node;
+            } else if next_node.borrow().value > new_head.borrow().value {
+                //curr_head should go to new Node and new should point at next
+                prev_nodes.push(curr_head.clone());
+                next_nodes.push(next_node.clone());
+                //attempt to go to next list if none then break
+                list_i = match list_i.checked_sub(1) {
+                    Some(i) => i,
+                    None => break, //no list exists break loop
+                };
+            } else {
+                return; //item already exists in the list 
+            }
+        }
+
+        //reverse lists, we have been pushing to end for convience so they are in exact reverse order
+        prev_nodes.reverse();
+        next_nodes.reverse();
+
+        //for all prev nodes set prev-> new_node
+        for (list_i, node) in prev_nodes.iter().enumerate() {
+            node.borrow_mut().set_next(new_head.clone(), list_i);
+        }
+
+        //we can just next_nodes for the new_head directyl
+        new_head.borrow_mut().next_nodes = next_nodes;
     }
 
     /// Test if `value` exists in the skip list.
@@ -279,50 +336,11 @@ where
         //not in list
         return None;
     }
-    /// Inserts `new_head` into the linked list at the given level, maintaining sorted order.
-    ///
-    /// Traverses the list at level `list` starting from `head` until it finds the
-    /// correct position, then wires up the forward pointers. Duplicate values are
-    /// silently ignored.
-    ///
-    /// # Arguments
-    /// * `head` - The head node to start traversal from, always the leftmost node
-    /// * `new_head` - The node to insert
-    /// * `list` - The level to insert into
-    fn insert_into_list(head: Head<T>, new_head: Head<T>, list: usize) {
-        let mut curr_head = head;
-        //now we must search the skip list 0 to insert the new element
-        loop {
-            //#TODO optimize insert to use better search instead of trivial search
-
-            //get next node, use block expression so curr_head borrow is dropped at the end of that scope
-            let next_head: Option<Head<T>> = { curr_head.borrow().next_nodes.get(list).cloned() };
-
-            //need to use if statement here instead of match since borrow will be dropped after condition executes
-            if let Some(next_head) = next_head {
-                if next_head.borrow().value > new_head.borrow().value {
-                    //new value should be inserted here
-                    //wire up forward pointers, set curr_head to point ot new node and new node to point at next node
-                    curr_head.borrow_mut().set_next(new_head.clone(), list);
-                    new_head.borrow_mut().set_next(next_head.clone(), list);
-                    return;
-                } else if next_head.borrow().value == new_head.borrow().value {
-                    return; //value aready in skip list ya dummy 
-                } else {
-                    curr_head = next_head.clone(); // go to loop iteration 
-                }
-            } else {
-                //last iteration since next_head does not exist
-                curr_head.borrow_mut().set_next(new_head, list);
-                return;
-            }
-        }
-    }
 
     ///literally a horrific terrible random solution
     /// I can only solve so many issues at once
     /// #TODO add a random crate or create good random
-    fn coin_flip() -> bool {
+    fn coin_flip(&self) -> bool {
         let mut buf: [u8; 1] = [0];
         let mut f = File::open("/dev/urandom").expect("Eginea a kapot");
         f.read_exact(&mut buf).expect("ENGINGE A REALLY KAPOT");
@@ -344,76 +362,72 @@ impl<T: Ord + fmt::Display> fmt::Display for SkipList<T> {
             Some(h) => h.clone(),
         };
 
-        // Collect all values at level 0 in order — this is the master list.
-        // All higher levels are subsets of this list.
-        let mut all_values: Vec<String> = Vec::new();
+        // --- Build master list from level 0 ---
+        // Each entry is (display_string, Rc pointer) so we can later check
+        // membership at higher levels via ptr_eq instead of string equality.
+        let mut master: Vec<(String, Head<T>)> = Vec::new();
         {
             let mut curr = Some(head.clone());
             while let Some(rc) = curr {
-                let next = {
-                    let node = rc.borrow();
-                    all_values.push(node.value.to_string());
-                    node.next_nodes.first().cloned()
-                };
+                let next = rc.borrow().next_nodes.first().cloned();
+                let val_str = rc.borrow().value.to_string(); // borrow dropped here
+                master.push((val_str, rc)); // rc moved here safely
                 curr = next;
             }
         }
 
-        // Compute column width from the widest value string so all columns align.
-        let width = all_values.iter().map(|v| v.len()).max().unwrap_or(1);
-        let arrow = " -> ";
-        let col_width = width + arrow.len();
-        let blank = " ".repeat(col_width);
-
-        // Level count is the number of next_nodes on the head since head
-        // participates in every level by definition.
         let max_level = head.borrow().next_nodes.len();
+        let col_w = master.iter().map(|(s, _)| s.len()).max().unwrap_or(1) + 2; // padding
+        let sep = "-".repeat(col_w * master.len() + 20);
 
         writeln!(
             f,
             "SkipList ({} levels, {} nodes):",
             max_level,
-            all_values.len()
+            master.len()
         )?;
-        writeln!(f, "{}", "-".repeat(col_width * all_values.len() + 6))?;
+        writeln!(f, "{}", sep)?;
 
-        // Print levels from highest to lowest so the sparsest list is on top.
-        for i in (0..max_level).rev() {
-            // Collect values present at this level by traversing from head.
-            let mut level_values: Vec<String> = Vec::new();
-            let mut level_count = 0;
+        for level in (0..max_level).rev() {
+            // Collect the Rc pointers present at this level, in order.
+            let mut level_ptrs: Vec<Head<T>> = Vec::new();
             {
                 let mut curr = Some(head.clone());
                 while let Some(rc) = curr {
-                    let next = {
-                        let node = rc.borrow();
-                        level_values.push(node.value.to_string());
-                        level_count += 1;
-                        node.next_nodes.get(i).cloned()
-                    };
+                    let next = rc.borrow().next_nodes.get(level).cloned();
+                    level_ptrs.push(rc);
                     curr = next;
                 }
             }
+            let node_count = level_ptrs.len();
 
-            write!(f, "L{}: ", i)?;
+            write!(f, "L{}: ", level)?;
 
-            // Walk the master list (level 0), printing the value if it exists at
-            // this level, or a blank column if it was not promoted.
-            let mut level_iter = level_values.iter().peekable();
-            for val in &all_values {
-                if level_iter.peek().map(|v| *v == val) == Some(true) {
-                    write!(f, "{:>width$}{}", val, arrow, width = width)?;
-                    level_iter.next();
+            // Walk the master list; print the value if this node is present at
+            // `level` (checked by pointer identity), else print blanks.
+            let mut level_iter = level_ptrs.iter();
+            let mut next_in_level = level_iter.next();
+            for (val_str, master_rc) in &master {
+                let present = next_in_level
+                    .map(|lrc| Rc::ptr_eq(lrc, master_rc))
+                    .unwrap_or(false);
+
+                if present {
+                    write!(f, "{:<col_w$}", val_str)?;
+                    next_in_level = level_iter.next();
                 } else {
-                    write!(f, "{}", blank)?;
+                    write!(f, "{:<col_w$}", "")?;
                 }
             }
-            writeln!(f, "None  ({} nodes)", level_count)?;
+            writeln!(
+                f,
+                "-> None  ({} node{})",
+                node_count,
+                if node_count == 1 { "" } else { "s" }
+            )?;
         }
 
-        writeln!(f, "{}", "-".repeat(col_width * all_values.len() + 6))?;
-        writeln!(f, "L0 values: {:?}", all_values)?;
-
+        writeln!(f, "{}", sep)?;
         Ok(())
     }
 }
