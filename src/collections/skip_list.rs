@@ -10,6 +10,7 @@ use std::io::Read;
 use std::rc::Rc;
 
 use crate::debug_panic;
+use crate::utils::random::coin_flip;
 
 ///type alias for node pointer
 type Head<T> = Rc<RefCell<Node<T>>>;
@@ -119,7 +120,7 @@ where
 
         //while we get "heads" promote node to the next
         let mut list_i: usize = 0;
-        while self.coin_flip() {
+        while coin_flip().expect("WHAT THE FUCK RANDOM ERROR") {
             list_i += 1;
         }
 
@@ -337,15 +338,6 @@ where
         return None;
     }
 
-    ///literally a horrific terrible random solution
-    /// I can only solve so many issues at once
-    /// #TODO add a random crate or create good random
-    fn coin_flip(&self) -> bool {
-        let mut buf: [u8; 1] = [0];
-        let mut f = File::open("/dev/urandom").expect("Eginea a kapot");
-        f.read_exact(&mut buf).expect("ENGINGE A REALLY KAPOT");
-        return buf[0] % 2 == 0;
-    }
 }
 
 /// Formats the `SkipList` for display, showing each level with aligned columns.
