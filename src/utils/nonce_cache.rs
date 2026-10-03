@@ -5,13 +5,12 @@
 
 use std::collections::HashMap;
 use std::collections::hash_map::Entry;
-use std::fs::File;
-use std::io::Read;
 use std::result::Result;
 use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
 use crate::utils::errors::UtilError;
+use crate::utils::random::fill_random_bytes;
 use crate::utils::time::current_time_millis;
 
 /// Thread safe Nonce Cache
@@ -26,15 +25,6 @@ pub struct NonceCache {
 }
 
 impl NonceCache {
-    /// Get random bytes from /dev/urandom this is a hacky quick fix we will need to find a good crypto crate later
-    /// TODO update with crypto crate
-    /// Claude generated function
-    fn get_random_bytes(buf: &mut [u8]) -> Result<(), UtilError> {
-        let mut f = File::open("/dev/urandom")?;
-        f.read_exact(buf)?;
-        Ok(())
-    }
-
     /// Creates a new `NonceCache`.
     ///
     /// # Arguments
@@ -138,7 +128,7 @@ impl NonceCache {
         //loop until we get nonce not in cache
         loop {
             //fill nonce_bytes with a random bytes
-            Self::get_random_bytes(&mut nonce_bytes)?;
+            fill_random_bytes(&mut nonce_bytes)?;
 
             //get current time in millis
             let now: u64 = current_time_millis()?;
